@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine, MetaData, Table, String, Integer, Column, Text, Boolean, ForeignKey
 
 
-def create_data_base():
+def create_data_base(name: str) -> None:
     metadata = MetaData()
-    engine = create_engine('sqlite:///sqlite.db')
+    engine = create_engine(f'sqlite:///{name}.db')
     engine.connect()
 
     labs = Table('labs', metadata,
@@ -51,7 +51,11 @@ def create_data_base():
     dangers_group = Table('dangers_group', metadata,
                           Column('id', Integer(), primary_key=True),
                           Column('name', String(20), nullable=False),
-                          Column('danger_id', String(10), ForeignKey('dangers_dict.id')))
+                          Column('danger_id', String(10), ForeignKey('dangers_dict.id'), nullable=False),
+                          Column('probability', Integer(), default=0),
+                          Column('severity', Integer(), default=0),
+                          Column('comment', Text(), nullable=False),
+                          Column('measures', Text(), nullable=True))
 
     result = Table('result', metadata,
                    Column('id', Integer(), primary_key=True),
