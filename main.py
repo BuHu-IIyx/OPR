@@ -1,5 +1,12 @@
+import datetime
 import pyodbc
 import csv
+import shutil
+
+
+def get_mguid(caption, m_order=1):
+    unique_num = int((datetime.datetime.now().timestamp() % 10) * 1000000000000000)
+    return hex(unique_num * m_order + id(caption))[2:].upper()
 
 
 def get_max_order(con, table):
@@ -15,21 +22,6 @@ def get_max_order(con, table):
 
     except pyodbc.Error as e:
         print("Error in Connection", e)
-
-
-# def get_max_uch(con):
-#     sql_str = 'SELECT MAX(m_order) FROM struct_uch'
-#     try:
-#         cursor = con.cursor()
-#         cursor.execute(sql_str)
-#         row = cursor.fetchone()
-#         if row[0] is not None:
-#             return row[0]
-#         else:
-#             return 0
-#
-#     except pyodbc.Error as e:
-#         print("Error in Connection", e)
 
 
 def check_ceh(con, name, org_id) -> int:
@@ -48,10 +40,11 @@ def check_ceh(con, name, org_id) -> int:
 
 
 def add_ceh(con, orgn, capt, order):
-    sql_str = 'INSERT INTO struct_ceh(org_id, caption, deleted, m_order) VALUES(?, ?, 0, ?)'
+    sql_str = 'INSERT INTO struct_ceh(org_id, caption, deleted, m_order, mguid) VALUES(?, ?, 0, ?, ?)'
+    mguid = get_mguid(capt)
     try:
         cursor = con.cursor()
-        cursor.execute(sql_str, orgn, capt, order)
+        cursor.execute(sql_str, orgn, capt, order, mguid)
 
     except pyodbc.Error as e:
         print("Error in Connection", e)
@@ -74,24 +67,28 @@ def check_uch(con, name, par_id, ceh_id):
 
 def add_uch(con, par_id, ceh_id, node_level, caption, m_order):
     sql_str = 'INSERT INTO `struct_uch` ' \
-              '(`par_id`, `ceh_id`, `node_level`, `caption`, `deleted`, `m_order`) ' \
-              'VALUES(?, ?, ?, ?, 0, ?)'
+              '(`par_id`, `ceh_id`, `node_level`, `caption`, `deleted`, `m_order`, `mguid`) ' \
+              'VALUES(?, ?, ?, ?, 0, ?, ?)'
+    mguid = get_mguid(caption)
     try:
         cursor = con.cursor()
-        cursor.execute(sql_str, par_id, ceh_id, node_level, caption, m_order)
+        cursor.execute(sql_str, par_id, ceh_id, node_level, caption, m_order, mguid)
 
     except pyodbc.Error as e:
         print("Error in Connection", e)
 
 
-def get_rm_id(con, ceh_id, uch_id, caption):
-    sql_str = 'SELECT MAX(id) FROM struct_rm WHERE ceh_id = ? AND uch_id = ? AND caption = ?'
+def get_rm_id(con, ceh_id, uch_id, caption, is_main=False):
+    sql_str = 'SELECT id FROM struct_rm WHERE ceh_id = ? AND uch_id = ? AND caption = ? ORDER BY id'
     try:
         cursor = con.cursor()
         cursor.execute(sql_str, ceh_id, uch_id, caption)
-        row = cursor.fetchone()
+        row = cursor.fetchall()
         if row:
-            return row[0]
+            if is_main:
+                return row[0][0]
+            else:
+                return row[len(row)-1][0]
         else:
             return -1
 
@@ -99,11 +96,14 @@ def get_rm_id(con, ceh_id, uch_id, caption):
         print("Error in Connection", e)
 
 
-def add_rm(con, ceh_id, uch_id, caption, codeok, etks, m_order):
+def add_rm(con, ceh_id, uch_id, caption, codeok, etks, m_order, is_main=True):
     sql_str = 'INSERT INTO struct_rm (caption, ceh_id, uch_id, codeok, etks, m_order, mguid, kut1, file_sout) ' \
               'VALUES(?, ?, ?, ?, ?, ?, ?, 2, ?)'
-    mguid = 'pass'
-    file_sout = mguid + '\Карта СОУТ.docx'
+    mguid = get_mguid(caption, m_order)
+    file_sout = (mguid + '\Карта СОУТ.docx') if is_main else ''
+    if is_main:
+        dist = 'C:\\Users\\buhu_\\PycharmProjects\\OPR\\DB\\ARMv51_files\\'
+        shutil.copytree(r'C:\Users\buhu_\PycharmProjects\OPR\office', dist + mguid)
     try:
         cursor = con.cursor()
         cursor.execute(sql_str, caption, ceh_id, uch_id, codeok, etks, m_order, mguid, file_sout)
@@ -162,20 +162,17 @@ def start_connect(conn_str):
         print("Error in Connection", e)
 
 
-def import_in_att(db_address, csv_address):
+def import_in_att(db_address, csv_address, org):
     conn = start_connect(db_address)
-    org = 1
     max_ceh = get_max_order(conn, 'struct_ceh') + 1
     max_uch = get_max_order(conn, 'struct_uch') + 1
     max_wp = get_max_order(conn, 'struct_rm') + 1
     with open(csv_address, newline='', encoding="utf-8") as File:
         reader = csv.reader(File, delimiter=';')
-        rm_prev = [0, '']
         flag = True
         for r in reader:
             ceh = None
             current_uch = 0
-            node = 0
             for i in range(7):
                 if len(r[i]) == 0:
                     break
@@ -186,27 +183,34 @@ def import_in_att(db_address, csv_address):
                         max_ceh += 1
                     ceh = check_ceh(conn, s, org)
                 else:
+                    node = 0 if i == 1 else 1
                     if check_uch(conn, s, current_uch, ceh) == -1:
                         add_uch(conn, current_uch, ceh, node, s, max_uch)
                         max_uch += 1
-                        node = 1
                     current_uch = check_uch(conn, s, current_uch, ceh)
-            add_rm(conn, ceh, current_uch, r[7], r[8], r[9], max_wp)
-            if r[7] == rm_prev[1]:
-                if flag:
-                    print(rm_prev)
-                    add_analog(conn, rm_prev[0], rm_prev[0])
-                add_analog(conn, get_rm_id(conn, ceh, current_uch, r[7]), rm_prev[0])
-                flag = False
-            else:
-                rm_prev = [get_rm_id(conn, ceh, current_uch, r[7]), r[7]]
+            wp_name = r[7][0].upper() + r[7][1:]
+            if get_rm_id(conn, ceh, current_uch, wp_name) == -1:
+                add_rm(conn, ceh, current_uch, wp_name, r[8], r[9], max_wp)
                 flag = True
+            else:
+                add_rm(conn, ceh, current_uch, wp_name, r[8], r[9], max_wp, False)
+                main_rm = get_rm_id(conn, ceh, current_uch, wp_name, True)
+                current_rm = get_rm_id(conn, ceh, current_uch, wp_name)
+                if flag:
+                    add_analog(conn, main_rm, main_rm)
+                add_analog(conn, current_rm, main_rm)
+                flag = False
+            max_wp += 1
+
     conn.commit()
     conn.close()
 
 
 if __name__ == '__main__':
     db_conn_str = r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};' \
-                  r'DBQ=C:\Users\buhu_\PycharmProjects\OPR\ARMv51.MDB;'
-    csv_address_str = 'First.csv'
-    import_in_att(db_conn_str, csv_address_str)
+                  r'DBQ=C:\Users\buhu_\PycharmProjects\OPR\DB\ARMv51.MDB;'
+    # csv_address_str = 'First.csv'
+    # organization = 1
+    csv_address_str = 'Second.csv'
+    organization = 2
+    import_in_att(db_conn_str, csv_address_str, organization)
