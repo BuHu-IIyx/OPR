@@ -162,7 +162,7 @@ def start_connect(conn_str):
         print("Error in Connection", e)
 
 
-def import_in_att(db_address, csv_address, org):
+def import_in_att(db_address, csv_address, org, column):
     conn = start_connect(db_address)
     max_ceh = get_max_order(conn, 'struct_ceh') + 1
     max_uch = get_max_order(conn, 'struct_uch') + 1
@@ -173,7 +173,7 @@ def import_in_att(db_address, csv_address, org):
         for r in reader:
             ceh = None
             current_uch = 0
-            for i in range(7):
+            for i in range(column):
                 if len(r[i]) == 0:
                     break
                 s = r[i][0].upper() + r[i][1:]
@@ -188,19 +188,19 @@ def import_in_att(db_address, csv_address, org):
                         add_uch(conn, current_uch, ceh, node, s, max_uch)
                         max_uch += 1
                     current_uch = check_uch(conn, s, current_uch, ceh)
-            wp_name = r[7][0].upper() + r[7][1:]
-            if get_rm_id(conn, ceh, current_uch, wp_name) == -1:
-                add_rm(conn, ceh, current_uch, wp_name, r[8], r[9], max_wp)
-                flag = True
-            else:
-                add_rm(conn, ceh, current_uch, wp_name, r[8], r[9], max_wp, False)
-                main_rm = get_rm_id(conn, ceh, current_uch, wp_name, True)
-                current_rm = get_rm_id(conn, ceh, current_uch, wp_name)
-                if flag:
-                    add_analog(conn, main_rm, main_rm)
-                add_analog(conn, current_rm, main_rm)
-                flag = False
-            max_wp += 1
+            # wp_name = r[7][0].upper() + r[7][1:]
+            # if get_rm_id(conn, ceh, current_uch, wp_name) == -1:
+            #     add_rm(conn, ceh, current_uch, wp_name, r[8], r[9], max_wp)
+            #     flag = True
+            # else:
+            #     add_rm(conn, ceh, current_uch, wp_name, r[8], r[9], max_wp, False)
+            #     main_rm = get_rm_id(conn, ceh, current_uch, wp_name, True)
+            #     current_rm = get_rm_id(conn, ceh, current_uch, wp_name)
+            #     if flag:
+            #         add_analog(conn, main_rm, main_rm)
+            #     add_analog(conn, current_rm, main_rm)
+            #     flag = False
+            # max_wp += 1
 
     conn.commit()
     conn.close()
@@ -208,9 +208,11 @@ def import_in_att(db_address, csv_address, org):
 
 if __name__ == '__main__':
     db_conn_str = r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};' \
-                  r'DBQ=C:\Users\buhu_\PycharmProjects\OPR\DB\ARMv51.MDB;'
+                  r'DBQ=C:\Users\buhu_\PycharmProjects\OPR\DBksu\ARMv51.MDB;'
     # csv_address_str = 'First.csv'
     # organization = 1
-    csv_address_str = 'Second.csv'
-    organization = 2
-    import_in_att(db_conn_str, csv_address_str, organization)
+    # csv_address_str = 'Second.csv'
+    # organization = 2
+    csv_address_str = 'DBksu/ksu.csv'
+    organization = 1
+    import_in_att(db_conn_str, csv_address_str, organization, 4)
