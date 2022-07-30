@@ -2,6 +2,7 @@ import datetime
 import pyodbc
 import csv
 import shutil
+from import_in_access import parsing_csv_to_dic as pars
 
 
 def get_mguid(caption, m_order=1):
@@ -88,7 +89,7 @@ def get_rm_id(con, ceh_id, uch_id, caption, is_main=False):
             if is_main:
                 return row[0][0]
             else:
-                return row[len(row)-1][0]
+                return row[len(row) - 1][0]
         else:
             return -1
 
@@ -206,13 +207,99 @@ def import_in_att(db_address, csv_address, org, column):
     conn.close()
 
 
+def import_DL(db_address, csv_address, org):
+    conn = start_connect(db_address)
+    max_ceh = get_max_order(conn, 'struct_ceh') + 1
+    max_uch = get_max_order(conn, 'struct_uch') + 1
+    with open(csv_address, newline='', encoding="utf-8") as File:
+        reader = csv.reader(File, delimiter=';')
+        ceh = None
+        curr_lvl = 0
+        arr = [0, 0, 0, 0, 0, 0, 0, 0]
+        address = ''
+        for r in reader:
+            if r[0]:
+                s = r[1]
+
+                if curr_lvl == 0 or int(r[0]) == 0:
+                    if check_ceh(conn, s, org) == -1:
+                        add_ceh(conn, org, s, max_ceh)
+                        max_ceh += 1
+                    ceh = check_ceh(conn, s, org)
+                    curr_lvl = 2
+
+                elif int(r[0]) == -1:
+                    address = r[1]
+
+                else:
+                    node = 0 if r[0] == '2' else 1
+                    if curr_lvl > int(r[0]):
+                        add_uch(conn, arr[curr_lvl - 2], ceh, node, address, max_uch)
+                        max_uch += 1
+                        curr_lvl = int(r[0])
+
+                    # if curr_lvl == 2:
+                    #     if check_uch(conn, s, 0, ceh) == -1:
+                    #         add_uch(conn, 0, ceh, node, s, max_uch)
+                    #         max_uch += 1
+                    #         curr_lvl += 1
+                    #         arr[curr_lvl] = check_uch(conn, s, arr[curr_lvl], ceh)
+
+                    if check_uch(conn, s, arr[curr_lvl - 2], ceh) == -1:
+                        print(arr[curr_lvl - 2], ceh, node, s, max_uch)
+                        add_uch(conn, arr[curr_lvl - 2], ceh, node, s, max_uch)
+                        max_uch += 1
+                        curr_lvl += 1
+                        arr[curr_lvl - 2] = check_uch(conn, s, arr[curr_lvl - 2], ceh)
+
+            print(arr)
+    conn.commit()
+    conn.close()
+
+
 if __name__ == '__main__':
-    db_conn_str = r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};' \
-                  r'DBQ=C:\Users\buhu_\PycharmProjects\OPR\DBksu\ARMv51.MDB;'
-    # csv_address_str = 'First.csv'
+    csv_address_str = 'Second.csv'
+    parser_csv = pars.ParserSCV(csv_address_str)
+    # Обязательные параметры:
+    #   Введите количество колонок с подразделениями
+    count = 7
+    #   Введите порядковый номер колонки с названиями рабочих мест
+    rm_column = 7
+    #   Введите номер колонки с просчетом
+    count_column = 14
+
+    # Не обязательные колонки, если колонки нет введите 0:
+    #   Введите порядковый номер колонки с ФИО.
+    fio_column = 0
+    #   Введите порядковый номер колонки с СНИЛС.
+    snils_column = 17
+    #   Введите порядковый номер колонки с оборудованием.
+    oborud_column = 0
+    #   Введите порядковый номер колонки с материалами
+    material_column = 0
+    #   Введите порядковый номер колонки с индивидуальным номером
+    ind_code_column = 16
+    #   Введите порядковый номер колонки с типом рабочего места (должно соответствовать ключу в dict.json)
+    rm_type_column = 0
+
+    # Вызов парсера
+    parser_csv.column_parsing(count, rm_column, count_column, fio_column=fio_column, snils_column=snils_column,
+                              oborud_column=oborud_column, material_column=material_column,
+                              ind_code_column=ind_code_column, rm_type_column=rm_type_column)
+    print(parser_csv.get_json('C:\\Users\\buhu_\\PycharmProjects\\OPR\\data\\res.json'))
+
+    # # db_conn_str = r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};' \
+    # #               r'DBQ=C:\Users\buhu_\PycharmProjects\OPR\DBksu\ARMv51.MDB;'
+    # db_conn_str = r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};' \
+    #               r'DBQ=C:\Users\buhu_\PycharmProjects\OPR\data\DL\ARMv51.MDB;'
+    # # csv_address_str = 'First.csv'
+    # # organization = 1
+    # # csv_address_str = 'Second.csv'
+    # # organization = 2
+    # # csv_address_str = 'DBksu/ksu.csv'
+    # # organization = 1
+    # csv_address_str = 'data/DLT.csv'
     # organization = 1
-    # csv_address_str = 'Second.csv'
-    # organization = 2
-    csv_address_str = 'DBksu/ksu.csv'
-    organization = 1
-    import_in_att(db_conn_str, csv_address_str, organization, 4)
+    # # import_in_att(db_conn_str, csv_address_str, organization, 4)
+    #
+    # import_DL(db_conn_str, csv_address_str, organization)
