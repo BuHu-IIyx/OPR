@@ -1,0 +1,19 @@
+{
+  "select": {
+    "max_order": "SELECT MAX(m_order) FROM ",
+    "id_ceh": "SELECT id FROM struct_ceh WHERE caption = ? AND org_id = ?",
+    "id_uch": "SELECT id FROM struct_uch WHERE caption = ? AND par_id = ? AND ceh_id = ?",
+    "id_rm": "SELECT id FROM struct_rm WHERE ceh_id = ? AND uch_id = ? AND caption = ? ORDER BY id",
+    "id_analog": "SELECT id FROM anal_group WHERE rm_id = ? AND main = ?",
+    "id_last": "SELECT @@identity"
+  },
+  "insert": {
+    "add_ceh": "INSERT INTO struct_ceh(org_id, caption, deleted, m_order, mguid) VALUES(?, ?, 0, ?, ?)",
+    "add_uch": "INSERT INTO struct_uch(par_id, ceh_id, node_level, caption, deleted, m_order, mguid) VALUES(?, ?, ?, ?, 0, ?, ?)",
+    "add_rm": "INSERT INTO struct_rm (caption, ceh_id, uch_id, codeok, etks, m_order, mguid, kut1, file_sout) VALUES(?, ?, ?, ?, ?, ?, ?, 2, ?)",
+    "add_analog": "INSERT INTO anal_group (group_id, rm_id, main) VALUES(?, ?, ?)"
+  },
+  "update": {
+    "update_analog": "UPDATE anal_group SET group_id = ? WHERE id = ?"
+  }
+}

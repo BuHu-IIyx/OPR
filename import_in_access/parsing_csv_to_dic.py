@@ -17,7 +17,7 @@ class ParserSCV:
             json.dump(self.res_dict, file, ensure_ascii=False, indent=4)
 
     def column_parsing(self, count: int, rm_column: int, count_column: int, fio_column=0, snils_column=0, oborud_column=0,
-                       material_column=0, ind_code_column=0, rm_type_column=0):
+                       material_column=0, ind_code_column=0, rm_type_column=0, etks_column=0, codeok_column=0):
         with open(self.csv_address, newline='', encoding="utf-8-sig") as File:
             reader = csv.reader(File, delimiter=';')
             self.res_dict['ceh'] = {}
@@ -53,6 +53,10 @@ class ParserSCV:
                     else 'Отсутствует'
                 rm_type = r[rm_type_column] if rm_type_column != 0 \
                     else 'office'
+                etks = r[etks_column] if etks_column != 0 \
+                    else ''
+                codeok = r[codeok_column] if codeok_column != 0 \
+                    else ''
 
                 # Создание ключа рабочих мест
                 if 'rm' not in current:
@@ -75,7 +79,9 @@ class ParserSCV:
                                'fio': [fio, ],
                                'snils': [snils, ],
                                'ind_code': [ind_code, ],
-                               'rm_type': rm_type}
+                               'rm_type': rm_type,
+                               'etks': etks,
+                               'codeok': codeok}
                     current['rm'].append(rm_dict)
 
                 # Если место есть — добавляем аналогию
