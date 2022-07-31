@@ -8,6 +8,7 @@
     "id_last": "SELECT @@identity"
   },
   "insert": {
+    "add_org": "INSERT INTO struct_org (caption, m_order, mguid) VALUES(?, ?, ?);",
     "add_ceh": "INSERT INTO struct_ceh(org_id, caption, deleted, m_order, mguid) VALUES(?, ?, ?, ?, ?)",
     "add_uch": "INSERT INTO struct_uch(par_id, ceh_id, node_level, caption, deleted, m_order, mguid) VALUES(?, ?, ?, ?, ?, ?, ?)",
     "add_rm": "INSERT INTO struct_rm (caption, ceh_id, uch_id, codeok, etks, m_order, mguid, kut1, file_sout) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",

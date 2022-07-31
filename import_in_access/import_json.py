@@ -7,8 +7,10 @@ import shutil
 class InterfaceDB:
     def __init__(self, conn_str, json_file_address):
         # Создаём соединение с БД:
+        self.conn_str = conn_str
+        db_conn_str = f'DRIVER={{Microsoft Access Driver (*.mdb, *.accdb)}}; DBQ={conn_str}\\ARMv51.MDB;'
         try:
-            self.connect = pyodbc.connect(conn_str)
+            self.connect = pyodbc.connect(db_conn_str)
             self.cursor = self.connect.cursor()
         except pyodbc.Error as e:
             print("Error in Connection", e)
@@ -28,13 +30,10 @@ class InterfaceDB:
             self.org_struct = json.load(file)
 
         # Получаем максимальное значение m_order из БД:
-        sql_str = self.sql_dict['select']['max_order'] + 'struct_ceh'
-        self.max_ceh = self.select_one_from_DB(sql_str)
-        print(self.max_ceh)
+        self.max_org = self.select_one_from_DB(self.sql_dict['select']['max_order'] + 'struct_org')
+        self.max_ceh = self.select_one_from_DB(self.sql_dict['select']['max_order'] + 'struct_ceh')
         self.max_uch = self.select_one_from_DB(self.sql_dict['select']['max_order'] + 'struct_uch')
-        print(self.max_uch)
         self.max_rm = self.select_one_from_DB(self.sql_dict['select']['max_order'] + 'struct_rm')
-        print(self.max_rm)
 
     @staticmethod
     def get_mguid(name_id: str, m_order=1) -> str:
@@ -146,11 +145,17 @@ class InterfaceDB:
             other_tuple = (id_rm, *self.rm_dict[rm_type][key])
             self.insert_in_DB(self.sql_dict['insert'][key], other_tuple)
 
-    @staticmethod
-    def insert_data(mguid, type_rm):
+    def insert_org(self, org_name):
+        org_tuple = (org_name, self.max_org, self.get_mguid(str(org_name), self.max_org))
+        self.insert_in_DB(self.sql_dict['insert']['add_org'], org_tuple)
+        org_id = self.select_one_from_DB(self.sql_dict['select']['id_last'])
+        return org_id
+
+    def insert_data(self, mguid, type_rm):
         if type_rm == 'office':
-            dist = 'C:\\Users\\buhu_\\PycharmProjects\\OPR\\DB\\ARMv51_files\\'
-            shutil.copytree(r'C:\Users\buhu_\PycharmProjects\OPR\office', dist + mguid)
+            dist = self.conn_str + '\\ARMv51_files\\' + mguid
+            p_dir = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\data\\templates\\{type_rm}'
+            shutil.copytree(p_dir, dist)
         else:
             pass
 
