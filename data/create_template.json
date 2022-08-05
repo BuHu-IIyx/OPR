@@ -1,0 +1,12 @@
+{
+  "per_genfactors" : "SELECT caption, time, time2, factor_id FROM per_genfactors;",
+  "per_gigfactors": "SELECT rzona_id, factor_id, caption, proctime FROM per_gigfactors;",
+  "per_rzona": "SELECT time, caption FROM per_rzona;",
+  "per_rzona_mat": "SELECT rzona_id, factor_id, param_id, name, him_code, proctime, him_class, vid_vozd, pdk FROM per_rzona_mat;",
+  "sout_dop_info2": "SELECT fac2, fac9, fac10, fac11, fac12, fac13, fac14 FROM sout_dop_info2;",
+  "sout_dop_info_fact": "SELECT oborud, material, dopl, dopl_txt, dop_otpusk, dop_otpusk_txt, week, week_txt, milk, milk_txt, profpit, profpit_txt, lpo, lpo_txt, medosm, medosm_txt, operac_t, operac_n, pevm, dop_shum, dop_vibr, dop_infr, dop_ultr, dop_vibr_loc, dop_him, dop_apfd, dop_bio FROM sout_dop_info_fact;",
+  "sout_dop_info_norm": "SELECT dopl, dopl_osn, dopotpusk, dopotpusk_osn, week, week_osn, milk, milk_osn, profpit, profpit_osn, lpo, lpo_osn, medosm, medosm_osn, kut1, kut2, kut3, kut4, kut5, kut6, kut7, kut8, kut9, kut10, kut11, kut12, kut13, kut14 FROM sout_dop_info_norm;",
+  "sout_factors": "SELECT factor_name, factor_id, KUT, izm_date, file, version, sex, tmp FROM sout_factors;",
+  "sout_ident": "SELECT is_ident, is_travma, travma, is_profzab, profzab, kut, is_rab, rab_descr, is_pk6, is_dop1, is_dop2, dop1, dop2 FROM sout_ident;",
+  "sout_karta_dop_info": "SELECT regim, trud FROM sout_karta_dop_info;"
+}

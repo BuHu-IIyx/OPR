@@ -109,7 +109,7 @@ class InterfaceDB:
             rabs_tuple = (id_rm, rm['fio'][0], rm['snils'][0])
             self.insert_in_DB(self.sql_dict['insert']['sout_rabs'], rabs_tuple)
             # Вставка данных из шаблона
-            self.insert_other_rm_data(rm['rm_type'], id_rm)
+            self.insert_other_rm_data(rm['rm_type'], id_rm, mguid)
             self.max_rm += 1
             # Создание файлов по шаблону:
             self.insert_data(mguid, rm['rm_type'])
@@ -136,14 +136,21 @@ class InterfaceDB:
                     an_rabs_tuple = (id_anal_rm, rm['fio'][i+1], rm['snils'][i+1])
                     self.insert_in_DB(self.sql_dict['insert']['sout_rabs'], an_rabs_tuple)
                     # Вставка данных из шаблона
-                    self.insert_other_rm_data(rm['rm_type'], id_anal_rm)
+                    self.insert_other_rm_data(rm['rm_type'], id_anal_rm, 0)
                     self.max_rm += 1
                     self.insert_in_DB(self.sql_dict['insert']['add_analog'], anal_id, id_anal_rm, id_rm)
 
-    def insert_other_rm_data(self, rm_type, id_rm):
+    def insert_other_rm_data(self, rm_type, id_rm, rm_mguid):
         for key in self.rm_dict[rm_type].keys():
-            other_tuple = (id_rm, *self.rm_dict[rm_type][key])
-            self.insert_in_DB(self.sql_dict['insert'][key], other_tuple)
+            if key == 'sout_factors':
+                if rm_mguid != 0:
+                    for i in self.rm_dict[rm_type][key]:
+                        address = rm_mguid + i[-1]
+                        other_tuple = (id_rm, *i[:-1], address, self.get_mguid(str(i), self.max_ceh))
+                        self.insert_in_DB(self.sql_dict['insert'][key], other_tuple)
+            else:
+                other_tuple = (id_rm, *self.rm_dict[rm_type][key])
+                self.insert_in_DB(self.sql_dict['insert'][key], other_tuple)
 
     def insert_org(self, org_name):
         org_tuple = (org_name, self.max_org, self.get_mguid(str(org_name), self.max_org))
@@ -152,7 +159,7 @@ class InterfaceDB:
         return org_id
 
     def insert_data(self, mguid, type_rm):
-        if type_rm == 'office':
+        if type_rm == 'office' or type_rm == 'office_hard':
             dist = self.conn_str + '\\ARMv51_files\\' + mguid
             p_dir = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\data\\templates\\{type_rm}'
             shutil.copytree(p_dir, dist)
