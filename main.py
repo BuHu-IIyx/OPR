@@ -37,7 +37,7 @@ def make_json_org(name):
     #   Введите порядковый номер колонки с названиями рабочих мест
     rm_column = 3
     #   Введите номер колонки с просчетом
-    count_column = 7
+    count_column = 11
 
     # Не обязательные колонки, если колонки нет введите 0:
     #   Введите порядковый номер колонки с ФИО.
@@ -45,17 +45,17 @@ def make_json_org(name):
     #   Введите порядковый номер колонки с СНИЛС.
     snils_column = 0
     #   Введите порядковый номер колонки с оборудованием.
-    oborud_column = 0
+    oborud_column = 8
     #   Введите порядковый номер колонки с материалами
-    material_column = 0
+    material_column = 9
     #   Введите порядковый номер колонки с индивидуальным номером
     ind_code_column = 0
     #   Введите порядковый номер колонки с типом рабочего места (должно соответствовать ключу в dict.json)
-    rm_type_column = 4
+    rm_type_column = 10
     #   Введите порядковый номер колонки с кодом по ОК
-    codeok_column = 0
+    codeok_column = 7
     #   Введите порядковый номер колонки с ЕТКС
-    etks_column = 0
+    etks_column = 6
     #   Введите порядковый номер колонки с адресом
     address_column = 0
 
@@ -121,5 +121,5 @@ def read_table(cursor, table, sql_str, res_dict):
 
 if __name__ == '__main__':
     # make_json_org('Винлаб СЗ')
-    import_in_db('Винлаб СЗ')
+    import_in_db('Винлаб ВЦ')
     # create_template_for_template()

@@ -23,9 +23,14 @@
     "sout_factors": "INSERT INTO sout_factors (rm_id, factor_name, factor_id, KUT, izm_date, version, sex, tmp, file, mguid) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
     "sout_ident": "INSERT INTO sout_ident (rm_id, is_ident, is_travma, is_profzab, kut, is_rab, rab_descr, is_pk6, is_dop1, is_dop2, dop1, dop2) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     "sout_karta_dop_info": "INSERT INTO sout_karta_dop_info (rm_id, regim, trud) VALUES(?, ?, ?)",
-    "sout_rabs": "INSERT INTO sout_rabs (rm_id, fio, snils) VALUES(?, ?, ?)"
+    "sout_rabs": "INSERT INTO sout_rabs (rm_id, fio, snils) VALUES(?, ?, ?)",
+    "sout_factor_info": "INSERT INTO `sout_factor_info` (mguid) VALUES(?);",
+    "per_rzona_info": "INSERT INTO `per_rzona_info` (zona_id, os_skor, os_patm, os_temp, os_vlag) VALUES(?, ?, ?, ?, ?);"
+
+
   },
   "update": {
-    "update_analog": "UPDATE anal_group SET group_id = ? WHERE id = ?"
+    "update_analog": "UPDATE anal_group SET group_id = ? WHERE id = ?",
+    "sout_dop_info_fact": "UPDATE sout_dop_info_fact SET oborud=?, material=? WHERE id=?;"
   }
 }
