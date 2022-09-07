@@ -124,13 +124,13 @@ class ParserSCV:
                         if s not in current:
                             current[s] = {}
                         current = current[s]
-
-                if address_column != 0:
-                    # Добавить адрес в подразделение:
-                    address = f"Фактический адрес: {r[address_column]}"
-                    if address not in current:
-                        current[address] = {}
-                    current = current[address]
+                # СКРЫТЬ В ВТБ
+                # if address_column != 0:
+                #     # Добавить адрес в подразделение:
+                #     address = f"Фактический адрес: {r[address_column]}"
+                #     if address not in current:
+                #         current[address] = {}
+                #     current = current[address]
 
                 if rm_column != 0:
                     # Инициализация информации о рабочем месте
@@ -144,12 +144,14 @@ class ParserSCV:
                     snils = r[snils_column] if snils_column != 0 \
                         else 'Отсутствует'
                     ind_code = r[ind_code_column] if ind_code_column != 0 \
-                        else 'Отсутствует'
+                        else ''
                     rm_type = r[rm_type_column] if rm_type_column != 0 \
                         else 'office'
                     etks = r[etks_column] if etks_column != 0 \
                         else ''
                     codeok = r[codeok_column] if codeok_column != 0 \
+                        else ''
+                    address = f"Фактический адрес: {r[address_column]}" if address_column != 0 \
                         else ''
 
                     # Создание ключа рабочих мест
@@ -163,7 +165,8 @@ class ParserSCV:
                                    'ind_code': [ind_code, ],
                                    'rm_type': rm_type,
                                    'etks': etks,
-                                   'codeok': codeok}
+                                   'codeok': codeok,
+                                   'address': address}
                         current['rm'] = [rm_dict, ]
 
                     # Если такого рабочего места нет — создаём новую запись
@@ -177,7 +180,8 @@ class ParserSCV:
                                    'ind_code': [ind_code, ],
                                    'rm_type': rm_type,
                                    'etks': etks,
-                                   'codeok': codeok}
+                                   'codeok': codeok,
+                                   'address': address}
                         current['rm'].append(rm_dict)
 
                     # Если место есть — добавляем аналогию
