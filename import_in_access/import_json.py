@@ -191,7 +191,8 @@ class InterfaceDB:
         return org_id
 
     def insert_data(self, mguid, type_rm):
-        if type_rm == 'office' or type_rm == 'office_hard' or type_rm == 'office_hard_hard':
+        if type_rm == 'office' or type_rm == 'office_hard' or type_rm == 'office_hard_hard' \
+                or type_rm == 'loader':
             dist = self.conn_str + '\\ARMv51_files\\' + mguid
             p_dir = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\data\\templates\\{type_rm}'
             shutil.copytree(p_dir, dist)
