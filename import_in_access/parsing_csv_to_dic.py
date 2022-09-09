@@ -17,7 +17,8 @@ class ParserSCV:
             json.dump(self.res_dict, file, ensure_ascii=False, indent=4)
 
     def row_parsing(self, rm_column: int, count_column: int, fio_column=0, snils_column=0, oborud_column=0,
-                    material_column=0, ind_code_column=0, rm_type_column=0, etks_column=0, codeok_column=0):
+                    material_column=0, ind_code_column=0, rm_type_column=0, etks_column=0, codeok_column=0,
+                    address_column=0):
         with open(self.csv_address, newline='', encoding="utf-8-sig") as File:
             reader = csv.reader(File, delimiter=';')
             self.res_dict['ceh'] = {}
@@ -58,6 +59,8 @@ class ParserSCV:
                             else ''
                         codeok = r[codeok_column] if codeok_column != 0 \
                             else ''
+                        address = f"Фактический адрес: {r[address_column]}" if address_column != 0 \
+                            else ''
                         rm_dict = {'caption': wp_name,
                                    'analog': 0,
                                    'oborud': oborud,
@@ -67,7 +70,8 @@ class ParserSCV:
                                    'ind_code': [ind_code, ],
                                    'rm_type': rm_type,
                                    'etks': etks,
-                                   'codeok': codeok}
+                                   'codeok': codeok,
+                                   'address': address}
                         current['rm'] = [rm_dict, ]
 
                     # Если такого рабочего места нет — создаём новую запись
@@ -82,6 +86,8 @@ class ParserSCV:
                             else ''
                         codeok = r[codeok_column] if codeok_column != 0 \
                             else ''
+                        address = f"Фактический адрес: {r[address_column]}" if address_column != 0 \
+                            else ''
                         rm_dict = {'caption': wp_name,
                                    'analog': 0,
                                    'oborud': oborud,
@@ -91,7 +97,8 @@ class ParserSCV:
                                    'ind_code': [ind_code, ],
                                    'rm_type': rm_type,
                                    'etks': etks,
-                                   'codeok': codeok}
+                                   'codeok': codeok,
+                                   'address': address}
                         current['rm'].append(rm_dict)
 
                     # Если место есть — добавляем аналогию

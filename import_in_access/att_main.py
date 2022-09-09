@@ -35,35 +35,41 @@ def make_json_org(name):
     #   Введите количество колонок с подразделениями
     count = 7
     #   Введите порядковый номер колонки с названиями рабочих мест
-    rm_column = 7
+    rm_column = 2
     #   Введите номер колонки с просчетом
-    count_column = 14
+    count_column = 3
 
     # Не обязательные колонки, если колонки нет введите 0:
     #   Введите порядковый номер колонки с ФИО.
-    fio_column = 0
+    fio_column = 14
     #   Введите порядковый номер колонки с СНИЛС.
-    snils_column = 18
+    snils_column = 15
     #   Введите порядковый номер колонки с оборудованием.
-    oborud_column = 0
+    oborud_column = 12
     #   Введите порядковый номер колонки с материалами
     material_column = 0
     #   Введите порядковый номер колонки с индивидуальным номером
-    ind_code_column = 16
+    ind_code_column = 17
     #   Введите порядковый номер колонки с типом рабочего места (должно соответствовать ключу в dict.json)
     rm_type_column = 0
     #   Введите порядковый номер колонки с кодом по ОК
-    codeok_column = 8
+    codeok_column = 0
     #   Введите порядковый номер колонки с ЕТКС
-    etks_column = 9
+    etks_column = 0
     #   Введите порядковый номер колонки с адресом
-    address_column = 13
+    address_column = 0
 
-    # Вызов парсера
-    parser_csv.column_parsing(count, rm_column, count_column, fio_column=fio_column, snils_column=snils_column,
-                              oborud_column=oborud_column, material_column=material_column,
-                              ind_code_column=ind_code_column, rm_type_column=rm_type_column,
-                              etks_column=etks_column, codeok_column=codeok_column, address_column=address_column)
+    # Вызов парсера по столбцам
+    # parser_csv.column_parsing(count, rm_column, count_column, fio_column=fio_column, snils_column=snils_column,
+    #                           oborud_column=oborud_column, material_column=material_column,
+    #                           ind_code_column=ind_code_column, rm_type_column=rm_type_column,
+    #                           etks_column=etks_column, codeok_column=codeok_column, address_column=address_column)
+    # Вызов парсера по строкам
+    parser_csv.row_parsing(rm_column, count_column, fio_column=fio_column, snils_column=snils_column,
+                           oborud_column=oborud_column, material_column=material_column,
+                           ind_code_column=ind_code_column, rm_type_column=rm_type_column,
+                           etks_column=etks_column, codeok_column=codeok_column, address_column=address_column)
+
     parser_csv.get_json(output_dir + '\\dict.json')
 
 
