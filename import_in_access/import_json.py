@@ -103,7 +103,7 @@ class InterfaceDB:
             kut1 = 2
             file_sout = mguid + r'\Карта СОУТ.docx'
             rm_tuple = (rm['caption'], id_ceh, id_uch, rm['codeok'], rm['etks'], self.max_rm, mguid, kut1, file_sout,
-                        str(rm['ind_code'][0]), rm['address'])
+                        str(rm['ind_code'][0]), rm['address'], rm['timesmena'])
             self.insert_in_DB(self.sql_dict['insert']['add_rm'], rm_tuple)
 
             # Получение id нового РМ:
@@ -141,7 +141,7 @@ class InterfaceDB:
             # Создаём кортеж для вставки и вставляем его в БД:
             file_sout = ''
             rm_tuple = (rm['caption'], id_ceh, id_uch, rm['codeok'], rm['etks'], self.max_rm, mguid, kut1, file_sout,
-                        str(rm['ind_code'][i + 1]), rm['address'])
+                        str(rm['ind_code'][i + 1]), rm['address'], rm['timesmena'])
             self.insert_in_DB(self.sql_dict['insert']['add_rm'], rm_tuple)
             # Получение id нового РМ и вставка в группу аналогии:
             id_anal_rm = self.select_one_from_DB(self.sql_dict['select']['id_last'])
@@ -191,13 +191,12 @@ class InterfaceDB:
         return org_id
 
     def insert_data(self, mguid, type_rm):
-        if type_rm == 'office' or type_rm == 'office_hard' or type_rm == 'office_hard_hard' \
-                or type_rm == 'loader':
+        if type_rm in self.rm_dict.keys():
             dist = self.conn_str + '\\ARMv51_files\\' + mguid
             p_dir = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\data\\templates\\{type_rm}'
             shutil.copytree(p_dir, dist)
         else:
-            pass
+            print('Для ' + type_rm + 'не создан шаблон!!!')
 
     def __del__(self):
         self.connect.commit()

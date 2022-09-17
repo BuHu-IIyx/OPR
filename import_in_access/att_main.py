@@ -58,17 +58,21 @@ def make_json_org(name):
     etks_column = 25
     #   Введите порядковый номер колонки с адресом
     address_column = 0
+    #   Введите порядковый номер колонки с временем смены
+    timesmena_column = 5
 
     # Вызов парсера по столбцам
     # parser_csv.column_parsing(count, rm_column, count_column, fio_column=fio_column, snils_column=snils_column,
     #                           oborud_column=oborud_column, material_column=material_column,
     #                           ind_code_column=ind_code_column, rm_type_column=rm_type_column,
-    #                           etks_column=etks_column, codeok_column=codeok_column, address_column=address_column)
+    #                           etks_column=etks_column, codeok_column=codeok_column, address_column=address_column,
+    #                           timesmena_column=timesmena_column)
     # Вызов парсера по строкам
     parser_csv.row_parsing(rm_column, count_column, fio_column=fio_column, snils_column=snils_column,
                            oborud_column=oborud_column, material_column=material_column,
                            ind_code_column=ind_code_column, rm_type_column=rm_type_column,
-                           etks_column=etks_column, codeok_column=codeok_column, address_column=address_column)
+                           etks_column=etks_column, codeok_column=codeok_column, address_column=address_column,
+                           timesmena_column=timesmena_column)
 
     parser_csv.get_json(output_dir + '\\dict.json')
 
