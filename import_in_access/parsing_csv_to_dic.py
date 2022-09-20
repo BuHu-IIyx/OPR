@@ -22,20 +22,43 @@ class ParserSCV:
         with open(self.csv_address, newline='', encoding="utf-8-sig") as File:
             reader = csv.reader(File, delimiter=';')
             self.res_dict['ceh'] = {}
+            current = self.res_dict['ceh']
+            current_lvl = 0
+            current_list = []
             for r in reader:
                 if len(r[0]) > 0:
                     s = self.start_with_b_l(r[1])
-
-                    if int(r[0]) == 1:
+                    if int(r[0]) == 0:
                         current = self.res_dict['ceh']
                         if s not in current.keys():
                             current[s] = {}
                             current[s]['uch'] = {}
                         current = current[s]['uch']
-                    elif int(r[0]) == 0:
-                        if s not in current.keys():
-                            current[s] = {}
-                        current = current[s]
+                        current_lvl = int(r[0])
+                        current_list.append(s)
+
+                    elif int(r[0]) > 0:
+                        if int(r[0]) > current_lvl:
+                            if s not in current.keys():
+                                current[s] = {}
+                            current = current[s]
+                            current_lvl = int(r[0])
+                            current_list.append(s)
+
+                        else:
+                            current = self.res_dict['ceh']
+                            temp_list = []
+                            for i in range(int(r[0])):
+                                current = current[current_list[i]]
+                                temp_list.append(current_list[i])
+                                if i == 0:
+                                    current = current['uch']
+                            if s not in current.keys():
+                                current[s] = {}
+                            temp_list.append(s)
+                            current = current[s]
+                            current_lvl = int(r[0])
+                            current_list = temp_list
 
                 elif len(r[rm_column]) > 0:
                     # Инициализация информации о рабочем месте
@@ -45,22 +68,28 @@ class ParserSCV:
                     snils = r[snils_column] if snils_column != 0 \
                         else 'Отсутствует'
                     ind_code = r[ind_code_column] if ind_code_column != 0 \
-                        else 'Отсутствует'
+                        else ''
+                    address = f"Фактический адрес: {r[address_column]}" if address_column != 0 \
+                        else ''
 
                     # Создание ключа рабочих мест
                     if 'rm' not in current.keys():
+                        if address not in current.keys():
+                            current[address] = {}
+                        current = current[address]
+                        current_lvl += 1
                         oborud = r[oborud_column] if oborud_column != 0 \
-                            else 'ПЭВМ, телефон, оргтехника'
+                            else ''
                         material = self.start_with_b_l(r[material_column]) if material_column != 0 \
-                            else 'Бумага, канцелярские принадлежности'
+                            else ''
                         rm_type = r[rm_type_column] if rm_type_column != 0 \
                             else 'office'
                         etks = r[etks_column] if etks_column != 0 \
                             else ''
                         codeok = r[codeok_column] if codeok_column != 0 \
                             else ''
-                        address = f"Фактический адрес: {r[address_column]}" if address_column != 0 \
-                            else ''
+                        # address = f"Фактический адрес: {r[address_column]}" if address_column != 0 \
+                        #     else ''
                         timesmena = int(float(r[timesmena_column].replace(',', '.')) * 60) if timesmena_column != 0 \
                             else 480
 
@@ -79,7 +108,7 @@ class ParserSCV:
                         current['rm'] = [rm_dict, ]
 
                     # Если такого рабочего места нет — создаём новую запись
-                    elif r[count_column].isdigit():
+                    elif len(r[count_column]) > 0:
                         oborud = r[oborud_column] if oborud_column != 0 \
                             else 'ПЭВМ, телефон, оргтехника'
                         material = self.start_with_b_l(r[material_column]) if material_column != 0 \
@@ -90,8 +119,8 @@ class ParserSCV:
                             else ''
                         codeok = r[codeok_column] if codeok_column != 0 \
                             else ''
-                        address = f"Фактический адрес: {r[address_column]}" if address_column != 0 \
-                            else ''
+                        # address = f"Фактический адрес: {r[address_column]}" if address_column != 0 \
+                        #     else ''
                         timesmena = int(float(r[timesmena_column].replace(',', '.')) * 60) if timesmena_column != 0 \
                             else 480
                         rm_dict = {'caption': wp_name,
@@ -150,9 +179,9 @@ class ParserSCV:
                     # Инициализация информации о рабочем месте
                     wp_name = self.start_with_b_l(r[rm_column])
                     oborud = self.start_with_b_l(r[oborud_column]) if oborud_column != 0 \
-                        else 'ПЭВМ, телефон, оргтехника'
+                        else ''
                     material = self.start_with_b_l(r[material_column]) if material_column != 0 \
-                        else 'Бумага, канцелярские принадлежности'
+                        else ''
                     fio = r[fio_column] if fio_column != 0 \
                         else ''
                     snils = r[snils_column] if snils_column != 0 \

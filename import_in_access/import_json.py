@@ -114,7 +114,8 @@ class InterfaceDB:
             # Вставка данных из шаблона
             self.insert_other_rm_data(rm['rm_type'], id_rm, mguid)
             self.max_rm += 1
-            self.insert_in_DB(self.sql_dict['update']['sout_dop_info_fact'], rm['oborud'], rm['material'], id_rm)
+            if rm['oborud'] != '':
+                self.insert_in_DB(self.sql_dict['update']['sout_dop_info_fact'], rm['oborud'], rm['material'], id_rm)
             # Создание файлов по шаблону:
             self.insert_data(mguid, rm['rm_type'])
 
@@ -155,8 +156,9 @@ class InterfaceDB:
                 rm_mguid = mguid
 
             self.insert_other_rm_data(rm['rm_type'], id_anal_rm, rm_mguid)
-            self.insert_in_DB(self.sql_dict['update']['sout_dop_info_fact'], rm['oborud'], rm['material'],
-                              id_anal_rm)
+            if rm['oborud'] != '':
+                self.insert_in_DB(self.sql_dict['update']['sout_dop_info_fact'], rm['oborud'], rm['material'],
+                                  id_anal_rm)
 
             self.max_rm += 1
             self.insert_in_DB(self.sql_dict['insert']['add_analog'], anal_id, id_anal_rm, id_rm)
