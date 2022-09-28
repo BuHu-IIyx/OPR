@@ -83,8 +83,8 @@ def add_uch(curr_uch, uchs, org_id, conn, departments, work_places, dangers_grou
             for rm in uchs['rm']:
                 insert_work_place(rm, dep_id[0], conn, work_places, dangers_group, result, persons)
         else:
-            curr_uch += ' - ' + uch
-            add_uch(curr_uch, uchs[uch], org_id, conn, departments, work_places, dangers_group, result, persons)
+            temp = curr_uch + ' - ' + uch
+            add_uch(temp, uchs[uch], org_id, conn, departments, work_places, dangers_group, result, persons)
 
 
 def insert_department(department_name, org_id, conn, departments):
@@ -96,7 +96,8 @@ def insert_department(department_name, org_id, conn, departments):
 
 
 def insert_work_place(wp, dep_id, conn, work_places, dangers_group, result, persons):
-    insert_wp = insert(work_places).values(name=wp['caption'], equipment=wp['oborud'], department_id=dep_id)
+    insert_wp = insert(work_places).values(name=wp['caption'], equipment=wp['oborud'], department_id=dep_id,
+                                           address=wp['address'])
     wp_id = conn.execute(insert_wp).inserted_primary_key[0]
     for name in wp['fio']:
         insert_fio = insert(persons).values(work_place_id=wp_id, name=name)
@@ -104,7 +105,7 @@ def insert_work_place(wp, dep_id, conn, work_places, dangers_group, result, pers
     wp_template = conn.execute(select([dangers_group]).where(dangers_group.c.name == wp['rm_type']))
     for risk in wp_template:
         insert_result_sql = insert(result).values(work_place_id=wp_id, danger_id=risk[2], probability=risk[3],
-                                                  severity=risk[4], comment=risk[5], measures=risk[6])
+                                                  severity=risk[4], comment=risk[5], measures=risk[6], object=risk[7])
         conn.execute(insert_result_sql)
 
 
@@ -166,21 +167,75 @@ def create_cards_docx(organization_name):
     doc.save(file_name)
 
 
-def create_docx_from_template(organization_name):
-    doc = Document('C:\\Users\\buhu_\\PycharmProjects\\OPR\\input\\for_risks\\templates\\prommash.docx')
+def create_docx_from_template(organization_name, lab):
+    doc = Document(f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\input\\for_risks\\templates\\{lab}.docx')
     style = doc.styles['Normal']
     style.font.name = 'Times New Roman'
     style.font.size = Pt(10)
     all_tables = doc.tables
     fill_table_risk_evaluation(all_tables[10], all_tables[11], organization_name)
-    file_name = f'Output/test_cards2.docx'
+    file_name = f'output/Риски/{organization_name}/отчет.docx'
     doc.save(file_name)
+
+
+def fill_tables_risk_evaluation_v2(table, table2, org_name):
+    engine = create_engine('sqlite:///prof_risks/sqlite.db')
+    conn = engine.connect()
+
+
+def add_wp_in_table(table, wp_name, risks_list):
+    probability_list = ['', 'Почти\nневоз-\nможно', 'Малове-\nроятно', 'Может\nбыть', 'Веро-\nятно',
+                        'Почти\nнавер-\nняка']
+    severity_list = ['', 'Ката-\nстрофи-\nческая', 'Значи-\nтельная', 'Сред-\nняя', 'Низкая', 'Незна-\nчитель-\nная']
+    row_count = 0
+    colors = [r'<w:shd {} w:fill="#92D050"/>', r'<w:shd {} w:fill="#FFFF00"/>',
+              r'<w:shd {} w:fill="#FF0000"/>']
+    for risk in risks_list:
+        result_str = ''
+        cells = table.add_row().cells
+        cells[0].paragraphs[0].alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+        cells[0].vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+        cells[0].paragraphs[0].add_run(str(risk[0])).font.size = Pt(9)
+        for i in range(2, 11):
+            cells[i].paragraphs[0].alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+            cells[i].vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+            cells[i].paragraphs[0].add_run(str(risk[i-1])).font.size = Pt(9)
+        if risk[7] < 5:
+            result_str = colors[0]
+        elif risk[7] < 12:
+            result_str = colors[1]
+        else:
+            result_str = colors[2]
+
+        shading_elm = parse_xml(result_str.format(nsdecls('w')))
+        cells[8]._tc.get_or_add_tcPr().append(shading_elm)
+
+    table.cell(0, 1).merge(table.cell(row_count, 1)).paragraphs[0].add_run(wp_name).font.size = Pt(9)
+
+
+def add_measures_in_table(table, wp_name, measures, count):
+    for measure in measures:
+        cells = table.add_row().cells
+    # cell3_text = f'Опасность:\n\n{row[2]}\n\nКоментарии аудитора:\n\n{row[5]}'
+    # res = [count, row[0] + ' / ' + row[1], cell3_text, cell4_text, row[6], row[3], row[3], row[4], row[4],
+    #            row[3] * row[4], row[3] * row[4]]
+    #     for i, item in enumerate(res):
+    #         cells2[i].paragraphs[0].alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+    #         cells2[i].vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+    #         cells2[i].paragraphs[0].add_run(str(item)).font.size = Pt(9)
+    #     shading_elm = parse_xml(result_str.format(nsdecls('w')))
+    #     cells2[9]._tc.get_or_add_tcPr().append(shading_elm)
+    #     shading_elm2 = parse_xml(result_str.format(nsdecls('w')))
+    #     cells2[10]._tc.get_or_add_tcPr().append(shading_elm2)
+    # shading_elm = parse_xml(result_str.format(nsdecls('w')))
+    # cells[8]._tc.get_or_add_tcPr().append(shading_elm)
 
 
 def fill_table_risk_evaluation(table, table2, org_name):
     engine = create_engine('sqlite:///prof_risks/sqlite.db')
     conn = engine.connect()
-    sql = text("""SELECT d.name, wp.name, dangers_dict.description, r.probability, r.severity, r.comment, r.measures 
+    sql = text("""SELECT d.name, wp.name, dangers_dict.description, r.probability, r.severity, r.comment, r.measures, 
+    r.object 
     FROM (result r JOIN dangers_dict ON r.danger_id = dangers_dict.id) JOIN work_places wp ON wp.id = r.work_place_id 
     JOIN departments d ON wp.department_id = d.id JOIN organizations o ON d.organization_id = o.id 
     WHERE o.name = :name""")
@@ -192,9 +247,11 @@ def fill_table_risk_evaluation(table, table2, org_name):
     count = 1
     table.style = 'Table Grid'
     table2.style = 'Table Grid'
+    len_res = 3702
     for row in res:
+        print(f'{count}/{len_res}')
         cells = table.add_row().cells
-        res = [count, row[0] + ' / ' + row[1], 'Процесс', row[2], probability_list[row[3]], row[3], severity_list[row[4]],
+        res = [count, row[0] + ' / ' + row[1], row[7], row[2], probability_list[row[3]], row[3], severity_list[row[4]],
                row[4], row[3] * row[4], row[5], row[6]]
         for i, item in enumerate(res):
             cells[i].paragraphs[0].alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
@@ -249,7 +306,7 @@ def get_work_places_from_DB(conn, department_id):
 
 
 def get_dangers_from_DB(conn, wp_id):
-    sql = text("""SELECT d.description, r.probability, r.severity, r.comment, r.measures 
+    sql = text("""SELECT d.description, r.probability, r.severity, r.comment, r.measures, r.object 
         FROM result r JOIN dangers_dict d ON r.danger_id = d.id
         WHERE r.work_place_id = :wp_id""")
     dic = {'wp_id': wp_id}
@@ -280,7 +337,7 @@ def generate_cards(organization_name, lab, contract):
             add_card_in_doc(doc, lab, contract, dep[1], wp[1], wp[2], dangers, count_cards, persons)
             count_cards += 1
 
-    file_name = f'Output/test_cards.docx'
+    file_name = f'output/Риски/{organization_name}/карты.docx'
     doc.save(file_name)
 
 
@@ -359,6 +416,7 @@ def fill_signature(doc, status, position, names, date):
 
 
 def add_card_in_doc(doc, lab, contract, department, wp_caption, wp_equipment, dangers, card_number, persons):
+    print(card_number)
     # Add card head
     table1 = doc.add_table(rows=2, cols=3)
     table1_cells = table1.rows[0].cells
