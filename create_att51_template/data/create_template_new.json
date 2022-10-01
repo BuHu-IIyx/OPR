@@ -1,0 +1,12 @@
+{
+  "per_genfactors" : "SELECT caption, [time], time2, factor_id FROM per_genfactors WHERE tabl4_id = ?;",
+  "per_gigfactors": "SELECT gig.factor_id, gig.caption, gig.proctime FROM per_gigfactors gig INNER JOIN per_rzona rz ON gig.rzona_id = rz.id WHERE rz.tabl4_id = ?;",
+  "per_rzona": "SELECT [time], caption FROM per_rzona WHERE tabl4_id = ?;",
+  "per_rzona_mat": "SELECT mat.factor_id, mat.param_id, mat.name, mat.him_code, mat.proctime, mat.him_class, mat.vid_vozd, mat.pdk FROM per_rzona_mat mat INNER JOIN per_rzona rz ON mat.rzona_id = rz.id WHERE rz.tabl4_id = ?;",
+  "sout_dop_info2": "SELECT fac2, fac9, fac10, fac11, fac12, fac13, fac14 FROM sout_dop_info2 WHERE rm_id = ?;",
+  "sout_dop_info_fact": "SELECT oborud, material, dopl, dopl_txt, dop_otpusk, dop_otpusk_txt, week, week_txt, milk, milk_txt, profpit, profpit_txt, lpo, lpo_txt, medosm, medosm_txt, operac_t, operac_n, pevm, dop_shum, dop_vibr, dop_infr, dop_ultr, dop_vibr_loc, dop_him, dop_apfd, dop_bio FROM sout_dop_info_fact WHERE rm_id = ?;",
+  "sout_dop_info_norm": "SELECT dopl, dopl_osn, dopotpusk, dopotpusk_osn, week, week_osn, milk, milk_osn, profpit, profpit_osn, lpo, lpo_osn, medosm, medosm_osn, kut1, kut2, kut3, kut4, kut5, kut6, kut7, kut8, kut9, kut10, kut11, kut12, kut13, kut14 FROM sout_dop_info_norm WHERE rm_id = ?;",
+  "sout_factors": "SELECT factor_name, factor_id, KUT, izm_date, version, sex, tmp, file FROM sout_factors WHERE rm_id = ?;",
+  "sout_ident": "SELECT is_ident, is_travma, is_profzab, kut, is_rab, rab_descr, is_pk6, is_dop1, is_dop2, dop1, dop2 FROM sout_ident WHERE rm_id = ?;",
+  "sout_karta_dop_info": "SELECT regim, trud FROM sout_karta_dop_info WHERE rm_id = ?;"
+}
