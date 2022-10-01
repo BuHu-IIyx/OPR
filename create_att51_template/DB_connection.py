@@ -30,6 +30,8 @@ class DBConnector:
         self.save_res_dict(template_name)
 
     def save_res_dict(self, template_name):
+        if not os.path.isdir(f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\{template_name}'):
+            os.mkdir(f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\{template_name}')
         json_address = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\{template_name}\\template.json'
         try:
             with open(json_address, 'w', encoding="utf-8-sig") as file:
@@ -53,7 +55,7 @@ class DBConnector:
 
     def get_rm_from_db(self, org_name):
         sql = 'SELECT rm.id, rm.caption, rm.mguid FROM (struct_rm rm INNER JOIN struct_ceh ceh ON rm.ceh_id = ceh.id) ' \
-              'INNER JOIN struct_org org ON ceh.org_id = org.id WHERE org.caption = ?'
+              'INNER JOIN struct_org org ON ceh.org_id = org.id WHERE org.caption = ? AND rm.deleted = 0'
         res = self.cursor.execute(sql, org_name).fetchall()
         return res
 
@@ -66,17 +68,18 @@ class DBConnector:
             print("Error in Connection", e)
 
     def copy_DB_files(self, rm_name, path_mguid, res_folder):
-        dist = self.db_path + '\\ARMv51_files\\' + path_mguid
+        from_path = self.db_path + '\\ARMv51_files\\' + path_mguid
         p_dir = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\{res_folder}\\{rm_name}'
-        res_path = self.check_folder(p_dir)
+        dist_path = self.check_folder(p_dir)
         try:
-            shutil.copytree(res_path, dist)
+            shutil.copytree(from_path, dist_path)
         except OSError as err:
-            print('Для ' + rm_name + 'не создан шаблон!!!')
+            print('Для ' + rm_name + ' не создан шаблон!!!')
             print(err)
 
     def check_folder(self, path, count=0):
-        if os.path.isdir(path + str(count)):
-            self.check_folder(path, (count + 1))
+        res_path = path + '\\' + str(count)
+        if os.path.isdir(res_path):
+            return self.check_folder(path, (count + 1))
         else:
-            return path + str(count)
+            return res_path
