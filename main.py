@@ -1,10 +1,17 @@
-from create_att51_template.create_att51_template_from_DB import create_att51_template
+from create_att51_DB.create_att51_template_from_DB import CreateTemplate
+from create_att51_DB.create_att51_db_from_json import CreateDB
 from import_in_access.att_main import make_json_org, import_in_db, create_template_for_template
 from prof_risks.risk_main import import_factors_from_csv, import_organization_csv, create_cards_docx, \
     fill_table_risk_evaluation, import_organization_json, create_docx_from_template, generate_cards
 
 if __name__ == '__main__':
-    create_att51_template()
+    # conn_str = 'C:\\Users\\buhu_\\PycharmProjects\\OPR\\input\\template'
+    # template = CreateTemplate(conn_str)
+    # template.create_template('template')
+
+    DB_interface = CreateDB('ОСИ Внуково1')
+    DB_interface.create_DB()
+    # create_att51_template()
 
     # make_json_org('Риски ОСИ МСК')
     # make_json_org('Риски ОСИ Внуково')

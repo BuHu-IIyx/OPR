@@ -1,26 +1,20 @@
-import json
 import os
 import shutil
+import json
 from datetime import datetime
-import pyodbc
+from create_att51_DB.DB_connection import DBConnector
 
 
-class DBConnector:
-    def __init__(self, conn_str, sql_dict_json_file):
+class CreateTemplate:
+    def __init__(self, db_path):
+        sql_dict_json_file = 'C:\\Users\\buhu_\\PycharmProjects\\OPR\\create_att51_DB\\data\\create_template_new.json'
+        self.db = DBConnector(db_path)
         self.res_dict = {}
-        self.db_path = conn_str
-        db_conn_str = f'DRIVER={{Microsoft Access Driver (*.mdb, *.accdb)}}; DBQ={conn_str}\\ARMv51.MDB;'
-        try:
-            connect = pyodbc.connect(db_conn_str)
-            self.cursor = connect.cursor()
-        except pyodbc.Error as e:
-            print("Error in Connection", e)
-
         with open(sql_dict_json_file, 'r', encoding="utf-8-sig") as file:
             self.sql_dict = json.load(file)
 
-    def create_template_json(self, template_name):
-        rms = self.get_rm_from_db(template_name)
+    def create_template(self, template_name):
+        rms = self.db.get_rm_from_db(template_name)
         for rm in rms:
             self.copy_DB_files(rm[1], rm[2], template_name)
             if rm[1] not in self.res_dict.keys():
@@ -32,7 +26,7 @@ class DBConnector:
     def save_res_dict(self, template_name):
         if not os.path.isdir(f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\{template_name}'):
             os.mkdir(f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\{template_name}')
-        json_address = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\{template_name}\\template.json'
+        json_address = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\{template_name}\\dict.json'
         try:
             with open(json_address, 'w', encoding="utf-8-sig") as file:
                 json.dump(self.res_dict, file, ensure_ascii=False, indent=4)
@@ -40,7 +34,7 @@ class DBConnector:
             print(e)
 
     def read_table(self, table, rm_id, rm_name):
-        rows = self.execute_DB(self.sql_dict[table], rm_id)
+        rows = self.db.execute_DB(self.sql_dict[table], rm_id)
         # rows = self.cursor.execute(self.sql_dict[table]).fetchall()
         if len(rows) > 0:
             self.res_dict[rm_name][table] = []
@@ -53,22 +47,8 @@ class DBConnector:
                         res_list.append(elem)
                 self.res_dict[rm_name][table].append(res_list)
 
-    def get_rm_from_db(self, org_name):
-        sql = 'SELECT rm.id, rm.caption, rm.mguid FROM (struct_rm rm INNER JOIN struct_ceh ceh ON rm.ceh_id = ceh.id) ' \
-              'INNER JOIN struct_org org ON ceh.org_id = org.id WHERE org.caption = ? AND rm.deleted = 0'
-        res = self.cursor.execute(sql, org_name).fetchall()
-        return res
-
-    def execute_DB(self, sql_str, args):
-        try:
-            res = self.cursor.execute(sql_str, args).fetchall()
-            return res
-
-        except pyodbc.Error as e:
-            print("Error in Connection", e)
-
     def copy_DB_files(self, rm_name, path_mguid, res_folder):
-        from_path = self.db_path + '\\ARMv51_files\\' + path_mguid
+        from_path = self.db.db_path + '\\ARMv51_files\\' + path_mguid
         p_dir = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\{res_folder}\\{rm_name}'
         dist_path = self.check_folder(p_dir)
         try:
@@ -83,3 +63,6 @@ class DBConnector:
             return self.check_folder(path, (count + 1))
         else:
             return res_path
+
+    def __del__(self):
+        self.db.__del__()
