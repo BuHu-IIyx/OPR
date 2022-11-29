@@ -19,6 +19,7 @@ class CreateTemplate:
             self.copy_DB_files(rm[1], rm[2], template_name)
             if rm[1] not in self.res_dict.keys():
                 self.res_dict[rm[1]] = {}
+                self.res_dict[rm[1]]['rm_data'] = {'codeok': rm[3], 'etks': rm[4]}
                 for key in self.sql_dict.keys():
                     self.read_table(key, rm[0], rm[1])
         self.save_res_dict(template_name)
@@ -64,5 +65,3 @@ class CreateTemplate:
         else:
             return res_path
 
-    def __del__(self):
-        self.db.__del__()

@@ -13,7 +13,8 @@ class DBConnector:
             print("Error in Connection", e)
 
     def get_rm_from_db(self, org_name):
-        sql = 'SELECT rm.id, rm.caption, rm.mguid FROM (struct_rm rm INNER JOIN struct_ceh ceh ON rm.ceh_id = ceh.id) ' \
+        sql = 'SELECT rm.id, rm.caption, rm.mguid, codeok, etks FROM (struct_rm rm INNER JOIN struct_ceh ceh ' \
+              'ON rm.ceh_id = ceh.id) ' \
               'INNER JOIN struct_org org ON ceh.org_id = org.id WHERE org.caption = ? AND rm.deleted = 0'
         res = self.cursor.execute(sql, org_name).fetchall()
         return res
@@ -21,6 +22,14 @@ class DBConnector:
     def execute_DB(self, sql_str, args):
         try:
             res = self.cursor.execute(sql_str, args).fetchall()
+            return res
+
+        except pyodbc.Error as e:
+            print("Error in Connection", e)
+
+    def execute_DB1(self, sql_str):
+        try:
+            res = self.cursor.execute(sql_str).fetchall()
             return res
 
         except pyodbc.Error as e:
@@ -40,8 +49,10 @@ class DBConnector:
         try:
             self.cursor.execute(sql_str, *args)
             self.connect.commit()
+            return
 
         except pyodbc.Error as e:
+            print(sql_str, args)
             print("Error in Connection", e)
 
     # def __del__(self):

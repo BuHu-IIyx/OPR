@@ -1,19 +1,84 @@
+import os
+
+from create_att51_DB.DB_connection import DBConnector
 from create_att51_DB.create_att51_template_from_DB import CreateTemplate
 from create_att51_DB.create_att51_db_from_json import CreateDB
-from import_in_access.att_main import make_json_org, import_in_db, create_template_for_template
-from prof_risks.risk_main import import_factors_from_csv, import_organization_csv, create_cards_docx, \
-    fill_table_risk_evaluation, import_organization_json, create_docx_from_template, generate_cards
+from create_wp_json.create_wp_json_from_csv import make_json_org
+from prof_risks.DocxAdapter import DocxAdapter
+
+# from import_in_access.att_main import make_json_org, import_in_db, create_template_for_template
+from prof_risks.risk_main import import_templates_from_csv, import_organization_json, generate_cards, \
+    fill_table_risk_evaluation, create_docx_from_template
+
+
+def create_db(name):
+    make_json_org(name)
+    db_interface = CreateDB(name)
+    db_interface.create_DB()
+
+
+def update_db():
+    db_path = "C:\\Users\\buhu_\\Работа\\Оборонка\\базы"
+    all_folders = os.listdir(db_path)
+    dict_measure = {
+        'Тяжесть (ж)': ['Тяжесть: Организовать рациональные режимы труда  и отдыха',
+                        'Снижение тяжести трудового процесса'],
+        'Тяжесть (м)': ['Тяжесть: Организовать рациональные режимы труда  и отдыха',
+                        'Снижение тяжести трудового процесса'],
+        'Аэрозоли ПФД': ['Аэрозоли ПФД: Организовать рациональные режимы труда  и отдыха',
+                         'Уменьшение времени контакта с вредными веществами'],
+        'Химический': ['Химический: Организовать рациональные режимы труда  и отдыха',
+                       'Уменьшение времени контакта с вредными веществами'],
+        'Микроклимат': ['Микроклимат: Организовать рациональные режимы труда  и отдыха',
+                        'Снижение времени воздействия фактора'],
+        'Шум': ['Шум: Определить необходимость оснащения рабочего места средствами индивидуальной защиты органов слуха;'
+                ' определить необходимость применения технических средств по снижению уровней шума в соответствии с'
+                ' требованиями СанПиН 1.2.3685-21 и рассмотреть вопрос ограничения времени воздействия шума на рабочих'
+                ' в соответствии с Р 2.2.2006-05', 'Снижение воздействия вредного фактора на организм человека'],
+        'УФ-излучение': ['УФ-излучение: Контроль за состоянием здоровья, с целью выявления профессиональных '
+                         'заболеваний',
+                         'Проведение медицинского осмотра']
+    }
+    for folder in all_folders:
+        db_conn = DBConnector(db_path + '\\' + folder)
+        sql = "SELECT id, factor_name FROM sout_factors WHERE KUT='3.1' OR KUT='3.2'"
+        res = db_conn.execute_DB1(sql)
+        sql_update = 'UPDATE sout_factor_info SET measure=?, purpose=? WHERE id=?'
+        for rm in res:
+            fact_id = rm[0]
+            fact_name = rm[1]
+            db_conn.insert_in_DB(sql_update, dict_measure[fact_name][0], dict_measure[fact_name][1], fact_id)
+        print(folder)
+
 
 if __name__ == '__main__':
+    # update_db()
     # conn_str = 'C:\\Users\\buhu_\\PycharmProjects\\OPR\\input\\template'
-    # template = CreateTemplate(conn_str)
-    # template.create_template('template')
 
-    DB_interface = CreateDB('ОСИ Внуково1')
-    DB_interface.create_DB()
+    # Создание контингента:
+    # conn_str1 = 'C:\\Users\\buhu_\\Работа\\концепт'
+    # template = CreateTemplate(conn_str1)
+    # template.create_template('Concept')
+
+    # Создание базы данных:
+    # create_db('Концепт')
+
     # create_att51_template()
 
-    # make_json_org('Риски ОСИ МСК')
+    # Импорт контингента в риски:
+    # import_templates_from_csv('C:\\Users\\buhu_\\PycharmProjects\\OPR\\input\\template\\Шаблоны Рисков.csv')
+
+    # Импорт json организации в базу данных:
+    # import_organization_json('C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\РИСКИ Антикор\\dict.json',
+    #                          'Антикор', org_head_pos='', org_head_name='')
+    # generate_cards('Антикор', 'egida', '340501-PNT', '30.11.2022')
+    # create_docx_from_template('Антикор', 'egida')
+
+    docAdapter = DocxAdapter('Антикор', 'egida', '340501-PNT', '30.11.2022')
+    docAdapter.generate_all()
+
+
+    # make_json_org('РИСКИ Антикор')
     # make_json_org('Риски ОСИ Внуково')
     # make_json_org('Риски ОСИ Горелово')
     # make_json_org('Риски ОСИ СПБ')

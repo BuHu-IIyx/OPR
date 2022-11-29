@@ -11,7 +11,7 @@
     "add_org": "INSERT INTO struct_org (caption, m_order, mguid) VALUES(?, ?, ?);",
     "add_ceh": "INSERT INTO struct_ceh(org_id, caption, deleted, m_order, mguid) VALUES(?, ?, ?, ?, ?)",
     "add_uch": "INSERT INTO struct_uch(par_id, ceh_id, node_level, caption, deleted, m_order, mguid) VALUES(?, ?, ?, ?, ?, ?, ?)",
-    "add_rm": "INSERT INTO struct_rm (caption, ceh_id, uch_id, codeok, etks, m_order, mguid, kut1, file_sout, ind_code, short_code, timesmena) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "add_rm": "INSERT INTO struct_rm (caption, ceh_id, uch_id, codeok, etks, m_order, mguid, kut1, file_sout, ind_code, short_code, timesmena, colrab_rm) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     "add_analog": "INSERT INTO anal_group (group_id, rm_id, main) VALUES(?, ?, ?)",
     "per_genfactors": "INSERT INTO per_genfactors (tabl4_id, caption, [time], time2, factor_id) VALUES(?, ?, ?, ?, ?);",
     "per_gigfactors": "INSERT INTO per_gigfactors (rzona_id, factor_id, caption, proctime) VALUES(?, ?, ?, ?);",

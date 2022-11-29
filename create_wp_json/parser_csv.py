@@ -10,7 +10,9 @@ class ParserSCV:
 
     @staticmethod
     def start_with_b_l(wrong_str: str) -> str:
-        return wrong_str[0].upper() + wrong_str[1:]
+        w_str = wrong_str.strip()
+        return w_str[0].upper() + w_str[1:].strip()
+            # .lower()
 
     def get_json(self, json_address: str):
         with open(json_address, 'w', encoding="utf-8-sig") as file:
@@ -18,7 +20,8 @@ class ParserSCV:
 
     def row_parsing(self, rm_column: int, count_column: int, fio_column=0, snils_column=0, oborud_column=0,
                     material_column=0, ind_code_column=0, rm_type_column=0, etks_column=0, codeok_column=0,
-                    address_column=0, timesmena_column=0, is_address_in_dep=False):
+                    address_column=0, timesmena_column=0, is_address_in_dep=False, people_in_rm_column=0):
+        wp_count = 0
         # Открытие файла
         with open(self.csv_address, newline='', encoding="utf-8-sig") as File:
             reader = csv.reader(File, delimiter=';')
@@ -77,7 +80,8 @@ class ParserSCV:
                 elif len(r[rm_column]) > 0:
                     # Инициализация информации о рабочем месте
                     wp_name = self.start_with_b_l(r[rm_column])
-                    fio = r[fio_column] if fio_column != 0 \
+                    wp_count += 1
+                    fio = r[fio_column].title() if fio_column != 0 \
                         else ''
                     snils = r[snils_column] if snils_column != 0 \
                         else 'Отсутствует'
@@ -89,7 +93,7 @@ class ParserSCV:
                         else ''
                     material = self.start_with_b_l(r[material_column]) if material_column != 0 \
                         else ''
-                    rm_type = r[rm_type_column] if rm_type_column != 0 \
+                    rm_type = r[rm_type_column].strip() if rm_type_column != 0 \
                         else 'office'
                     etks = r[etks_column] if etks_column != 0 \
                         else ''
@@ -97,6 +101,9 @@ class ParserSCV:
                         else ''
                     timesmena = int(float(r[timesmena_column].replace(',', '.')) * 60) if timesmena_column != 0 \
                         else 480
+                    people_in_rm = (2 if r[people_in_rm_column] == '2/2' else
+                                    (4 if r[people_in_rm_column] == '3/3' else 1)) if timesmena_column != 0 \
+                        else 1
 
                     rm_dict = {'caption': wp_name,
                                'analog': 0,
@@ -109,7 +116,8 @@ class ParserSCV:
                                'etks': etks,
                                'codeok': codeok,
                                'address': address,
-                               'timesmena': timesmena}
+                               'timesmena': timesmena,
+                               'people_in_rm': people_in_rm}
 
                     # Создание ключа рабочих мест, и вставка первого РМ в отдел
                     if 'rm' not in current.keys():
@@ -132,9 +140,13 @@ class ParserSCV:
                         current['rm'][-1]['snils'].append(snils)
                         current['rm'][-1]['ind_code'].append(ind_code)
 
+        print(f'Создан json файл на {wp_count} рм')
+
     def column_parsing(self, count: int, rm_column: int, count_column: int, fio_column=0, snils_column=0,
                        oborud_column=0, material_column=0, ind_code_column=0, rm_type_column=0, etks_column=0,
-                       codeok_column=0, address_column=0, timesmena_column=0, is_address_in_dep=False):
+                       codeok_column=0, address_column=0, timesmena_column=0, is_address_in_dep=False,
+                       people_in_rm_column=0):
+        wp_count = 0
         # Открытие файла
         with open(self.csv_address, newline='', encoding="utf-8-sig") as File:
             reader = csv.reader(File, delimiter=';')
@@ -173,6 +185,7 @@ class ParserSCV:
                         current = current[address]
 
                 if rm_column != 0:
+                    wp_count += 1
                     # Инициализация информации о рабочем месте
                     wp_name = self.start_with_b_l(r[rm_column])
                     oborud = self.start_with_b_l(r[oborud_column]) if oborud_column != 0 \
@@ -195,6 +208,10 @@ class ParserSCV:
                         else ''
                     timesmena = int(float(r[timesmena_column].replace(',', '.')) * 60) if timesmena_column != 0 \
                         else 480
+                    people_in_rm = 2 if r[people_in_rm_column] == '2х2' \
+                        else 4 if r[people_in_rm_column] == '3х3' \
+                        else 1 if timesmena_column != 0 \
+                        else 1
 
                     rm_dict = {'caption': wp_name,
                                'analog': 0,
@@ -207,7 +224,8 @@ class ParserSCV:
                                'etks': etks,
                                'codeok': codeok,
                                'address': address,
-                               'timesmena': timesmena}
+                               'timesmena': timesmena,
+                               'people_in_rm': people_in_rm}
 
                     # Создание ключа рабочих мест
                     if 'rm' not in current:
@@ -223,3 +241,5 @@ class ParserSCV:
                         current['rm'][-1]['fio'].append(fio)
                         current['rm'][-1]['snils'].append(snils)
                         current['rm'][-1]['ind_code'].append(ind_code)
+
+        print(f'Создан json файл на {wp_count} рм')

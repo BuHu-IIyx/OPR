@@ -13,6 +13,21 @@ from docx.oxml.shared import OxmlElement, qn
 import json
 
 
+def import_templates_from_csv(csv_file):
+    engine = create_engine('sqlite:///prof_risks/sqlite.db')
+    metadata = MetaData(engine)
+    conn = engine.connect()
+    dangers_group = Table('dangers_group', metadata, autoload=True)
+
+    with open(csv_file, newline='', encoding="utf-8-sig") as File:
+        reader = csv.reader(File, delimiter=';')
+        for row in reader:
+            conn.execute(insert(dangers_group).values(name=row[1], description=row[2],
+                                                      danger_id=row[4].split()[0].strip()[:-1],
+                                                      probability=row[6], severity=row[8], comment=row[10],
+                                                      measures=row[12], object=row[3]))
+
+
 def import_factors_from_csv(csv_file):
     engine = create_engine('sqlite:///prof_risks/sqlite.db')
     metadata = MetaData(engine)
@@ -321,7 +336,7 @@ def get_persons_from_DB(conn, wp_id):
     return persons
 
 
-def generate_cards(organization_name, lab, contract):
+def generate_cards(organization_name, lab, contract, date_otch):
     doc = create_cards_file()
     engine = create_engine('sqlite:///prof_risks/sqlite.db')
     conn = engine.connect()
@@ -334,7 +349,7 @@ def generate_cards(organization_name, lab, contract):
                 doc.add_page_break()
             dangers = get_dangers_from_DB(conn, wp[0])
             persons = get_persons_from_DB(conn, wp[0])
-            add_card_in_doc(doc, lab, contract, dep[1], wp[1], wp[2], dangers, count_cards, persons)
+            add_card_in_doc(doc, lab, contract, dep[1], wp[1], wp[2], dangers, count_cards, persons, date_otch)
             count_cards += 1
 
     file_name = f'output/Риски/{organization_name}/карты.docx'
@@ -366,8 +381,9 @@ def fill_signature(doc, status, position, names, date):
     run.font.size = Pt(8)
     table = doc.add_table(rows=0, cols=7)
     names_list = []
-    for name in names:
-        names_list.append(name)
+    if status != 1:
+        for name in names:
+            names_list.append(name)
     if status == 1:
         for i in range(10):
             names_list.append('')
@@ -415,7 +431,7 @@ def fill_signature(doc, status, position, names, date):
             cell2.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.TOP
 
 
-def add_card_in_doc(doc, lab, contract, department, wp_caption, wp_equipment, dangers, card_number, persons):
+def add_card_in_doc(doc, lab, contract, department, wp_caption, wp_equipment, dangers, card_number, persons, date_otch):
     print(card_number)
     # Add card head
     table1 = doc.add_table(rows=2, cols=3)
@@ -543,7 +559,7 @@ def add_card_in_doc(doc, lab, contract, department, wp_caption, wp_equipment, da
         cells3[5]._tc.get_or_add_tcPr().append(shading_elm)
 
     doc.add_paragraph("")
-    fill_signature(doc, 0, 'Инженер по специальной оценке условий труда ИЛ', ['Василенко А.С.', ], '20.09.2022')
+    fill_signature(doc, 0, 'Инженер по специальной оценке условий труда ИЛ', ['Василенко А.С.', ], date_otch)
     fill_signature(doc, 1, wp_caption, persons, '')
 
     return
