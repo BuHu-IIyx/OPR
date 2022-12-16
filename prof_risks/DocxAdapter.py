@@ -276,7 +276,7 @@ class DocxAdapter:
         cell4_text = ['Низкий', 'Умеренный', 'Высокий']
         for row in res_table_2:
             cells2 = table2.add_row().cells
-            cell3_text = f'Опасность:\n\n{row[2]}\n\nКоментарии аудитора:\n\n{row[5]}'
+            cell3_text = f'Опасность:\n\n{row[2]}\n\nКомментарии аудитора:\n\n{row[5]}'
             res = [count, row[0] + ' / ' + row[1], cell3_text, cell4_text[self.get_color_index(row[3] * row[4])],
                    row[6], row[3], row[3], row[4], row[4], row[3] * row[4], row[3] * row[4]]
             for i, item in enumerate(res):
