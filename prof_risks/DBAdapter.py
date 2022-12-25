@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, select, MetaData, Table, insert, text
+from sqlalchemy import create_engine, select, MetaData, Table, insert, text, and_
 import json
 import csv
 
@@ -43,8 +43,10 @@ class DBAdapter:
                 self.insert_structure_of_organization(temp, uchs[uch], org_id)
 
     def insert_department(self, department_name, org_id):
-        dep_id = self.conn.execute(select([self.departments.c.id]).where(self.departments.c.name == department_name)) \
-            .fetchone()
+        dep_id = self.conn.execute(select([self.departments.c.id]).where(and_(
+                            self.departments.c.name == department_name,
+                            self.departments.c.organization_id == org_id
+                        ))).fetchone()
         if dep_id is None:
             insert_dep_sql = insert(self.departments).values(name=department_name, address='', organization_id=org_id)
             dep_id = self.conn.execute(insert_dep_sql).inserted_primary_key
@@ -71,11 +73,22 @@ class DBAdapter:
         with open(csv_file, newline='', encoding="utf-8-sig") as File:
             reader = csv.reader(File, delimiter=';')
             for row in reader:
-                self.conn.execute(insert(self.dangers_group).values(name=row[1], description=row[2],
-                                                                    danger_id=row[4].split()[0].strip()[:-1],
-                                                                    probability=row[6], severity=row[8],
-                                                                    comment=row[10],
-                                                                    measures=row[12], object=row[3]))
+                s = self.conn.execute(
+                    select(self.dangers_group.c.id).where(
+                        and_(
+                            self.dangers_group.c.name == row[1],
+                            self.dangers_group.c.danger_id == row[4].split()[0].strip()[:-1]
+                        ))
+                ).fetchone()
+                if s:
+                    print(row[1])
+                    continue
+                else:
+                    self.conn.execute(insert(self.dangers_group).values(name=row[1], description=row[2],
+                                                                        danger_id=row[4].split()[0].strip()[:-1],
+                                                                        probability=row[6], severity=row[8],
+                                                                        comment=row[10],
+                                                                        measures=row[12], object=row[3]))
 
     # ---------------------------------------------------------
     #         Получение данных для заполнения карт из БД:

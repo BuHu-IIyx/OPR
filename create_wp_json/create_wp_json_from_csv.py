@@ -18,7 +18,7 @@ def make_json_org(name):
     #   Введите порядковый номер колонки с названиями рабочих мест
     rm_column = 1
     #   Введите номер колонки с просчетом
-    count_column = 2
+    count_column = 7
 
     # Не обязательные колонки, если колонки нет введите 0:
     #   Введите порядковый номер колонки с ФИО.
@@ -26,13 +26,13 @@ def make_json_org(name):
     #   Введите порядковый номер колонки с СНИЛС.
     snils_column = 0
     #   Введите порядковый номер колонки с оборудованием.
-    oborud_column = 4
+    oborud_column = 3
     #   Введите порядковый номер колонки с материалами
-    material_column = 5
+    material_column = 4
     #   Введите порядковый номер колонки с индивидуальным номером
     ind_code_column = 0
     #   Введите порядковый номер колонки с типом рабочего места (должно соответствовать ключу в dict.json)
-    rm_type_column = 7
+    rm_type_column = 2
     #   Введите порядковый номер колонки с кодом по ОК
     codeok_column = 0
     #   Введите порядковый номер колонки с ЕТКС
@@ -42,7 +42,7 @@ def make_json_org(name):
     #   Введите порядковый номер колонки с временем смены
     timesmena_column = 0
     #   Введите порядковый номер колонки со сменностью
-    people_in_rm_column = 3
+    people_in_rm_column = 0
 
     if flag == 'column':
         # Вызов парсера по столбцам
@@ -50,7 +50,7 @@ def make_json_org(name):
                                   oborud_column=oborud_column, material_column=material_column,
                                   ind_code_column=ind_code_column, rm_type_column=rm_type_column,
                                   etks_column=etks_column, codeok_column=codeok_column, address_column=address_column,
-                                  timesmena_column=timesmena_column, is_address_in_dep=True,
+                                  timesmena_column=timesmena_column, is_address_in_dep=False,
                                   people_in_rm_column=people_in_rm_column)
     elif flag == 'row':
         # Вызов парсера по строкам

@@ -10,8 +10,9 @@ from create_att51_DB.DB_connection import DBConnector
 
 
 class CreateDB:
-    def __init__(self, org_name):
+    def __init__(self, org_name, template_name):
         self.org_name = org_name
+        self.template_name = template_name
         conn_str = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\{org_name}'
         if not os.path.exists(conn_str):
             os.mkdir(conn_str)
@@ -30,7 +31,7 @@ class CreateDB:
             self.sql_dict = json.load(file)
 
         # Загружаем файл с шаблонами рабочих мест:
-        dict_json_file = 'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\Concept\\dict.json'
+        dict_json_file = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\{self.template_name}\\dict.json'
         with open(dict_json_file, 'r', encoding="utf-8-sig") as file:
             self.rm_dict = json.load(file)
 
@@ -215,7 +216,7 @@ class CreateDB:
     def insert_data(self, mguid, type_rm):
         if type_rm in self.rm_dict.keys():
             dist = self.conn_str + '\\ARMv51_files\\' + mguid
-            p_dir = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\Concept\\{type_rm}'
+            p_dir = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\{self.template_name}\\{type_rm}'
             all_folders = os.listdir(p_dir)
             rand_int = random.randint(0, len(all_folders) - 1)
             p_dir += '\\' + all_folders[rand_int]

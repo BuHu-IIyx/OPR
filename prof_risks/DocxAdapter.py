@@ -40,7 +40,7 @@ class DocxAdapter:
                 self.add_card_in_doc(dep[1], wp[1], wp[2], dangers, count_cards, persons)
                 count_cards += 1
 
-        file_name = f'output/Риски/{self.organization_name}/карты.docx'
+        file_name = f'output/РИСКИ {self.organization_name}/карты.docx'
         self.cards_doc.save(file_name)
 
     def add_card_in_doc(self, department, wp_caption, wp_equipment, dangers, card_number, persons):
@@ -240,7 +240,7 @@ class DocxAdapter:
         all_tables = doc.tables
         self.fill_table_1(all_tables[10])
         self.fill_table_2(all_tables[11])
-        file_name = f'output/Риски/{self.organization_name}/отчет.docx'
+        file_name = f'output/РИСКИ {self.organization_name}/отчет.docx'
         doc.save(file_name)
 
     def fill_table_1(self, table):
