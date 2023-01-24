@@ -12,6 +12,10 @@ from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from docx.oxml.shared import OxmlElement, qn
 
+from progress.bar import IncrementalBar, Bar
+
+from openpyxl import Workbook, load_workbook
+
 
 class DocxAdapter:
     def __init__(self, organization_name, lab, contract, date_otch):
@@ -28,6 +32,8 @@ class DocxAdapter:
 
     def generate_cards(self):
         # doc = self.create_cards_file()
+        wp_count = self.db.get_all_wp_in_org(self.organization_name)
+        bar = Bar('Карты:', max=wp_count)
         departments = self.db.get_departments_from_DB(self.organization_name)
         count_cards = 1
         for dep in departments:
@@ -39,12 +45,14 @@ class DocxAdapter:
                 persons = self.db.get_persons_from_DB(wp[0])
                 self.add_card_in_doc(dep[1], wp[1], wp[2], dangers, count_cards, persons)
                 count_cards += 1
+                bar.next()
 
         file_name = f'output/РИСКИ {self.organization_name}/карты.docx'
         self.cards_doc.save(file_name)
+        bar.finish()
 
     def add_card_in_doc(self, department, wp_caption, wp_equipment, dangers, card_number, persons):
-        print(card_number)
+        # print(card_number)
         # Add card head
         table1 = self.cards_doc.add_table(rows=2, cols=3)
         table1_cells = table1.rows[0].cells
@@ -246,7 +254,8 @@ class DocxAdapter:
     def fill_table_1(self, table):
         count = 1
         table.style = 'Table Grid'
-        res_table_1 = self.db.get_table_1_data(self.organization_name)
+        res_table_1, table_count = self.db.get_table_1_data(self.organization_name)
+        bar = Bar('Таблица 1:', max=table_count)
         probability_list = ['', 'Почти\nневоз-\nможно', 'Малове-\nроятно', 'Может\nбыть', 'Веро-\nятно',
                             'Почти\nнавер-\nняка']
         severity_list = ['', 'Незна-\nчитель-\nная', 'Низкая', 'Сред-\nняя', 'Значи-\nтельная',
@@ -254,7 +263,8 @@ class DocxAdapter:
         colors = [r'<w:shd {} w:fill="#92D050"/>', r'<w:shd {} w:fill="#FFFF00"/>',
                   r'<w:shd {} w:fill="#FF0000"/>']
         for row in res_table_1:
-            print(f'{count}')
+            # print(f'{count}')
+            bar.next()
             cells = table.add_row().cells
             res_row = [count, row[0] + ' / ' + row[1], row[7], row[2], probability_list[row[3]], row[3],
                        severity_list[row[4]], row[4], row[3] * row[4], row[5], row[6]]
@@ -267,18 +277,23 @@ class DocxAdapter:
             cells[8]._tc.get_or_add_tcPr().append(shading_elm)
             count += 1
 
+        bar.finish()
+        return 0
+
     def fill_table_2(self, table2):
         count = 1
         table2.style = 'Table Grid'
-        res_table_2 = self.db.get_table_2_data(self.organization_name)
+        res_table_2, table_count = self.db.get_table_2_data(self.organization_name)
+        bar1 = IncrementalBar('Таблица 2:', max=table_count)
         colors = [r'<w:shd {} w:fill="#92D050"/>', r'<w:shd {} w:fill="#FFFF00"/>',
                   r'<w:shd {} w:fill="#FF0000"/>']
         cell4_text = ['Низкий', 'Умеренный', 'Высокий']
         for row in res_table_2:
+            bar1.next()
             cells2 = table2.add_row().cells
             cell3_text = f'Опасность:\n\n{row[2]}\n\nКомментарии аудитора:\n\n{row[5]}'
             res = [count, row[0] + ' / ' + row[1], cell3_text, cell4_text[self.get_color_index(row[3] * row[4])],
-                   row[6], row[3], row[3], row[4], row[4], row[3] * row[4], row[3] * row[4]]
+                   row[6], row[3], row[8], row[4], row[9], row[3] * row[4], row[8] * row[9]]
             for i, item in enumerate(res):
                 cells2[i].paragraphs[0].alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
                 cells2[i].vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
@@ -291,6 +306,7 @@ class DocxAdapter:
             cells2[10]._tc.get_or_add_tcPr().append(shading_elm2)
             count += 1
 
+        bar1.finish()
         return 0
 
     @staticmethod

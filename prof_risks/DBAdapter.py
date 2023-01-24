@@ -63,7 +63,8 @@ class DBAdapter:
         for risk in wp_template:
             insert_result_sql = insert(self.result).values(work_place_id=wp_id, danger_id=risk[2], probability=risk[3],
                                                            severity=risk[4], comment=risk[5], measures=risk[6],
-                                                           object=risk[7])
+                                                           object=risk[7], probability_after=risk[8],
+                                                           severity_after=risk[9])
             self.conn.execute(insert_result_sql)
 
     # ---------------------------------------------------------
@@ -87,8 +88,10 @@ class DBAdapter:
                     self.conn.execute(insert(self.dangers_group).values(name=row[1], description=row[2],
                                                                         danger_id=row[4].split()[0].strip()[:-1],
                                                                         probability=row[6], severity=row[8],
-                                                                        comment=row[10],
-                                                                        measures=row[12], object=row[3]))
+                                                                        comment=row[13],
+                                                                        measures=row[15], object=row[3],
+                                                                        probability_after=row[10],
+                                                                        severity_after=row[11]))
 
     # ---------------------------------------------------------
     #         Получение данных для заполнения карт из БД:
@@ -121,6 +124,16 @@ class DBAdapter:
         # persons = self.conn.execute(sql, **dic)
         return self.conn.execute(sql, **dic)
 
+    def get_all_wp_in_org(self, org_name):
+        sql_count = text("""
+                SELECT COUNT(wp.name)
+                FROM work_places wp
+                JOIN departments d ON wp.department_id = d.id JOIN organizations o ON d.organization_id = o.id
+                WHERE o.name = :name
+                """)
+        dic = {'name': org_name}
+        return int(self.conn.execute(sql_count, **dic).fetchone()[0])
+
     # ---------------------------------------------------------
     #    Получение данных для заполнения файла отчета из БД:
     # ---------------------------------------------------------
@@ -131,18 +144,35 @@ class DBAdapter:
         JOIN work_places wp ON wp.id = r.work_place_id
         JOIN departments d ON wp.department_id = d.id JOIN organizations o ON d.organization_id = o.id
         WHERE o.name = :name
+        ORDER BY d.id, wp.id, r.danger_id
         """)
+        sql_count = text("""
+                SELECT COUNT(wp.name)
+                FROM (result r JOIN dangers_dict ON r.danger_id = dangers_dict.id) 
+                JOIN work_places wp ON wp.id = r.work_place_id
+                JOIN departments d ON wp.department_id = d.id JOIN organizations o ON d.organization_id = o.id
+                WHERE o.name = :name
+                """)
         dic = {'name': org_name}
-        return self.conn.execute(sql, **dic)
+        return self.conn.execute(sql, **dic), int(self.conn.execute(sql_count, **dic).fetchone()[0])
 
     def get_table_2_data(self, org_name):
         sql = text("""
-        SELECT d.name, wp.name, dangers_dict.description, r.probability, r.severity, r.comment, r.measures, r.object
+        SELECT d.name, wp.name, dangers_dict.description, r.probability, r.severity, r.comment, r.measures, r.object, 
+        r.probability_after, r.severity_after
         FROM (result r JOIN dangers_dict ON r.danger_id = dangers_dict.id) 
         JOIN work_places wp ON wp.id = r.work_place_id
         JOIN departments d ON wp.department_id = d.id JOIN organizations o ON d.organization_id = o.id
         WHERE o.name = :name AND r.probability * r.severity > 4
         ORDER BY r.probability * r.severity DESC
         """)
+        sql_count = text("""
+                SELECT COUNT(wp.name)
+                FROM (result r JOIN dangers_dict ON r.danger_id = dangers_dict.id) 
+                JOIN work_places wp ON wp.id = r.work_place_id
+                JOIN departments d ON wp.department_id = d.id JOIN organizations o ON d.organization_id = o.id
+                WHERE o.name = :name AND r.probability * r.severity > 4
+                ORDER BY r.probability * r.severity DESC
+                """)
         dic = {'name': org_name}
-        return self.conn.execute(sql, **dic)
+        return self.conn.execute(sql, **dic), int(self.conn.execute(sql_count, **dic).fetchone()[0])

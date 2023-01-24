@@ -6,6 +6,7 @@ from create_att51_DB.create_att51_db_from_json import CreateDB
 from create_wp_json.create_wp_json_from_csv import make_json_org
 from prof_risks.DBAdapter import DBAdapter
 from prof_risks.DocxAdapter import DocxAdapter
+from prof_risks.risk_main import generate_cards, create_docx_from_template
 
 
 # from import_in_access.att_main import make_json_org, import_in_db, create_template_for_template
@@ -71,24 +72,24 @@ if __name__ == '__main__':
 
     # Импорт контингента в риски:
     # db = DBAdapter()
-    # db.import_templates_from_csv('C:\\Users\\buhu_\\PycharmProjects\\OPR\\input\\template\\Шаблоны Рисков.csv')
+    # db.import_templates_from_csv('C:\\Users\\buhu_\\PycharmProjects\\OPR\\input\\template\\Шаблоны Рисков NEW.csv')
 
     # Импорт json организации в базу данных:
-    org_name = 'Алроса'
+    org_name = 'Агрофирма Южная 2'
     # db = DBAdapter()
     # db.import_organization_json(
     #     f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\РИСКИ {org_name}\\dict.json',
     #     org_name, org_head_pos='', org_head_name='')
 
     # Создать отчет по рискам из БД
-    docAdapter = DocxAdapter(org_name, 'egida', '2022-12-369971-RDI-SC', '23.12.2022')
+    docAdapter = DocxAdapter(org_name, 'egida', '361137-SHL', '24.01.2023')
     docAdapter.generate_all()
 
     # generate_cards('Антикор', 'egida', '340501-PNT', '30.11.2022')
     # create_docx_from_template('Антикор', 'egida')
 
-    # make_json_org('РИСКИ Монтажсервисстрой')
-    # make_json_org('Риски ОСИ Внуково')
+    # make_json_org(f'РИСКИ {org_name}')
+    # make_json_org(org_name)
     # make_json_org('Риски ОСИ Горелово')
     # make_json_org('Риски ОСИ СПБ')
 

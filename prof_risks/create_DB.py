@@ -64,6 +64,8 @@ def create_data_base(name: str) -> None:
                    Column('probability', Integer(), default=0),
                    Column('severity', Integer(), default=0),
                    Column('comment', Text(), nullable=False),
-                   Column('measures', Text(), nullable=True))
+                   Column('measures', Text(), nullable=True),
+                   Column('probability_after', Integer(), default=0),
+                   Column('severity_after', Integer(), default=0))
 
     metadata.create_all(engine)
