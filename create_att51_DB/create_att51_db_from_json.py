@@ -96,7 +96,8 @@ class CreateDB:
             codeok = rm['codeok'] if rm['codeok'] != '' else self.rm_dict[rm['rm_type']]['rm_data']['codeok']
             etks = rm['etks'] if rm['codeok'] != '' else self.rm_dict[rm['rm_type']]['rm_data']['etks']
             rm_tuple = (rm['caption'], id_ceh, id_uch, codeok, etks, self.max_rm, mguid, kut1, file_sout,
-                        str(rm['ind_code'][0]), rm['address'], rm['timesmena'], rm['people_in_rm'])
+                        str(rm['ind_code'][0]), rm['address'], rm['timesmena'], rm['people_in_rm'],
+                        rm['woman_in_rm'][0])
             self.db.insert_in_DB(self.sql_dict['insert']['add_rm'], rm_tuple)
 
             # Получение id нового РМ:
@@ -138,7 +139,8 @@ class CreateDB:
             codeok = rm['codeok'] if rm['codeok'] != '' else self.rm_dict[rm['rm_type']]['rm_data']['codeok']
             etks = rm['etks'] if rm['codeok'] != '' else self.rm_dict[rm['rm_type']]['rm_data']['etks']
             rm_tuple = (rm['caption'], id_ceh, id_uch, codeok, etks, self.max_rm, mguid, kut1, file_sout,
-                        str(rm['ind_code'][i + 1]), rm['address'], rm['timesmena'], rm['people_in_rm'])
+                        str(rm['ind_code'][i + 1]), rm['address'], rm['timesmena'], rm['people_in_rm'],
+                        rm['woman_in_rm'][i+1])
             self.db.insert_in_DB(self.sql_dict['insert']['add_rm'], rm_tuple)
             # Получение id нового РМ и вставка в группу аналогии:
             id_anal_rm = self.db.select_one_from_DB(self.sql_dict['select']['id_last'])

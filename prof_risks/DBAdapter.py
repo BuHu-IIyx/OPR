@@ -60,12 +60,17 @@ class DBAdapter:
             insert_fio = insert(self.persons).values(work_place_id=wp_id, name=name)
             self.conn.execute(insert_fio)
         wp_template = self.conn.execute(select([self.dangers_group]).where(self.dangers_group.c.name == wp['rm_type']))
+        flag = False
         for risk in wp_template:
+            flag = True
             insert_result_sql = insert(self.result).values(work_place_id=wp_id, danger_id=risk[2], probability=risk[3],
                                                            severity=risk[4], comment=risk[5], measures=risk[6],
-                                                           object=risk[7], probability_after=risk[8],
-                                                           severity_after=risk[9])
+                                                           object=risk[7], probability_after=risk[9],
+                                                           severity_after=risk[10])
             self.conn.execute(insert_result_sql)
+        if not flag:
+            # TODO проверить как работает этот момент!!!
+            raise Exception(f'Шаблон для РМ {wp["caption"]} не найден!!!!!')
 
     # ---------------------------------------------------------
     #            Импорт CSV файла шаблонов в БД:

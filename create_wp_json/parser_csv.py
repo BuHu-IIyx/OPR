@@ -20,7 +20,8 @@ class ParserSCV:
 
     def row_parsing(self, rm_column: int, count_column: int, fio_column=0, snils_column=0, oborud_column=0,
                     material_column=0, ind_code_column=0, rm_type_column=0, etks_column=0, codeok_column=0,
-                    address_column=0, timesmena_column=0, is_address_in_dep=False, people_in_rm_column=0):
+                    address_column=0, timesmena_column=0, is_address_in_dep=False, people_in_rm_column=0,
+                    woman_in_rm_column=0):
         wp_count = 0
         # Открытие файла
         with open(self.csv_address, newline='', encoding="utf-8-sig") as File:
@@ -145,7 +146,7 @@ class ParserSCV:
     def column_parsing(self, count: int, rm_column: int, count_column: int, fio_column=0, snils_column=0,
                        oborud_column=0, material_column=0, ind_code_column=0, rm_type_column=0, etks_column=0,
                        codeok_column=0, address_column=0, timesmena_column=0, is_address_in_dep=False,
-                       people_in_rm_column=0):
+                       people_in_rm_column=0, woman_in_rm_column=0):
         wp_count = 0
         # Открытие файла
         with open(self.csv_address, newline='', encoding="utf-8-sig") as File:
@@ -212,6 +213,8 @@ class ParserSCV:
                         else 4 if r[people_in_rm_column] == '3х3' \
                         else 1 if timesmena_column != 0 \
                         else 1
+                    woman_in_rm = r[woman_in_rm_column] if woman_in_rm_column != 0 \
+                        else 0
 
                     rm_dict = {'caption': wp_name,
                                'analog': 0,
@@ -220,6 +223,7 @@ class ParserSCV:
                                'fio': [fio, ],
                                'snils': [snils, ],
                                'ind_code': [ind_code, ],
+                               'woman_in_rm': [woman_in_rm, ],
                                'rm_type': rm_type,
                                'etks': etks,
                                'codeok': codeok,
@@ -241,5 +245,6 @@ class ParserSCV:
                         current['rm'][-1]['fio'].append(fio)
                         current['rm'][-1]['snils'].append(snils)
                         current['rm'][-1]['ind_code'].append(ind_code)
+                        current['rm'][-1]['woman_in_rm'].append(woman_in_rm)
 
         print(f'Создан json файл на {wp_count} рм')

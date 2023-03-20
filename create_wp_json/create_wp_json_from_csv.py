@@ -14,35 +14,37 @@ def make_json_org(name):
     # По строкам 'row', по столбцам 'column'
     flag = 'column'
     #   Введите количество колонок с подразделениями
-    count = 3
+    count = 8
     #   Введите порядковый номер колонки с названиями рабочих мест
-    rm_column = 3
+    rm_column = 8
     #   Введите номер колонки с просчетом
-    count_column = 4
+    count_column = 14
 
     # Не обязательные колонки, если колонки нет введите 0:
     #   Введите порядковый номер колонки с ФИО.
     fio_column = 0
     #   Введите порядковый номер колонки с СНИЛС.
-    snils_column = 0
+    snils_column = 18
     #   Введите порядковый номер колонки с оборудованием.
-    oborud_column = 6
+    oborud_column = 9
     #   Введите порядковый номер колонки с материалами
-    material_column = 7
+    material_column = 10
     #   Введите порядковый номер колонки с индивидуальным номером
-    ind_code_column = 0
+    ind_code_column = 16
     #   Введите порядковый номер колонки с типом рабочего места (должно соответствовать ключу в dict.json)
-    rm_type_column = 5
+    rm_type_column = 15
     #   Введите порядковый номер колонки с кодом по ОК
-    codeok_column = 0
+    codeok_column = 11
     #   Введите порядковый номер колонки с ЕТКС
-    etks_column = 0
+    etks_column = 12
     #   Введите порядковый номер колонки с адресом
-    address_column = 0
+    address_column = 13
     #   Введите порядковый номер колонки с временем смены
     timesmena_column = 0
     #   Введите порядковый номер колонки со сменностью
     people_in_rm_column = 0
+    #   Введите порядковый номер колонки с количеством женщин
+    woman_in_rm_column = 17
 
     if flag == 'column':
         # Вызов парсера по столбцам
@@ -51,13 +53,14 @@ def make_json_org(name):
                                   ind_code_column=ind_code_column, rm_type_column=rm_type_column,
                                   etks_column=etks_column, codeok_column=codeok_column, address_column=address_column,
                                   timesmena_column=timesmena_column, is_address_in_dep=False,
-                                  people_in_rm_column=people_in_rm_column)
+                                  people_in_rm_column=people_in_rm_column, woman_in_rm_column=woman_in_rm_column)
     elif flag == 'row':
         # Вызов парсера по строкам
         parser_csv.row_parsing(rm_column, count_column, fio_column=fio_column, snils_column=snils_column,
                                oborud_column=oborud_column, material_column=material_column,
                                ind_code_column=ind_code_column, rm_type_column=rm_type_column,
                                etks_column=etks_column, codeok_column=codeok_column, address_column=address_column,
-                               timesmena_column=timesmena_column, people_in_rm_column=people_in_rm_column)
+                               timesmena_column=timesmena_column, people_in_rm_column=people_in_rm_column,
+                               woman_in_rm_column=woman_in_rm_column)
 
     parser_csv.get_json(output_dir + '\\dict.json')
