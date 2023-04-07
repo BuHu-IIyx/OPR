@@ -69,7 +69,7 @@ class DBAdapter:
                                                            severity_after=risk[10])
             self.conn.execute(insert_result_sql)
         if not flag:
-            # TODO проверить как работает этот момент!!!
+            # ошибка если нет шаблона
             raise Exception(f'Шаблон для РМ {wp["caption"]} не найден!!!!!')
 
     # ---------------------------------------------------------

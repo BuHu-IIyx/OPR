@@ -5,12 +5,13 @@ import random
 import pyodbc
 import json
 import shutil
+from progress.bar import Bar
 
 from create_att51_DB.DB_connection import DBConnector
 
 
 class CreateDB:
-    def __init__(self, org_name, template_name):
+    def __init__(self, org_name, template_name, rm_count):
         self.org_name = org_name
         self.template_name = template_name
         conn_str = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\{org_name}'
@@ -45,6 +46,7 @@ class CreateDB:
         self.max_uch = self.db.select_one_from_DB(self.sql_dict['select']['max_order'] + 'struct_uch')
         self.max_rm = self.db.select_one_from_DB(self.sql_dict['select']['max_order'] + 'struct_rm')
         self.wp_count = 0
+        self.bar = Bar('Выполнено:', max=rm_count)
 
     @staticmethod
     def get_mguid(name_id: str, m_order=1) -> str:
@@ -225,9 +227,11 @@ class CreateDB:
             shutil.copytree(p_dir, dist)
             # Подсчет рабочих мест в оплату
             self.wp_count += 1
+            self.bar.next()
         else:
             print('Для ' + type_rm + 'не создан шаблон!!!')
 
     def __del__(self):
+        self.bar.finish()
         print(f'{self.org_name}: Создана БД на {self.wp_count} рм в оплату.')
     #     # self.db.__del__()

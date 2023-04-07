@@ -15,8 +15,8 @@ from prof_risks.risk_main import generate_cards, create_docx_from_template
 
 
 def create_db(name, template_name):
-    make_json_org(name)
-    db_interface = CreateDB(name, template_name)
+    rm_count = make_json_org(name)
+    db_interface = CreateDB(name, template_name, rm_count)
     db_interface.create_DB()
 
 
@@ -59,15 +59,15 @@ if __name__ == '__main__':
     # conn_str = 'C:\\Users\\buhu_\\PycharmProjects\\OPR\\input\\template'
 
     # Создание контингента:
-    # conn_str1 = 'C:\\Users\\buhu_\\Работа\\СБЕР\\SBER'
+    # conn_str1 = 'C:\\Users\\buhu_\\Работа\\Альфа\\база конт'
     # template = CreateTemplate(conn_str1)
-    # template.create_template('SBER')
+    # template.create_template('ALFA')
 
     # Создание базы данных:
     # arr_sber = ['2 ВТБ ГО 2023', '2 ВТБ ОПЕРУ+7806 2023']
     # for item in arr_sber:
     #     create_db(item, 'template')
-    create_db('ВТБ ГО 2023', 'template')
+    create_db('АЛЬФА', 'ALFA')
 
     # create_att51_template()
 
@@ -77,15 +77,15 @@ if __name__ == '__main__':
     #                              '\\Шаблоны Рисков Птицефабрика.csv')
 
     # Импорт json организации в базу данных:
-    # org_name = 'ВТБ ОПЕРУ+7806 2023'
+    # org_name = 'ОСИ(испр1)'
     # db = DBAdapter()
     # db.import_organization_json(
     #     f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\РИСКИ {org_name}\\dict.json',
     #     org_name, org_head_pos='', org_head_name='')
 
     # Создать отчет по рискам из БД
-    # docAdapter = DocxAdapter(org_name, 'sercons', '2022-12-371251-PKK-SC', '17.03.2023')
-    # docAdapter.generate_otchet_file()
+    # docAdapter = DocxAdapter(org_name, 'sercons', '2022-07-340613-RDI-SC', '20.09.2022')
+    # # docAdapter.generate_otchet_file()
     # docAdapter.generate_cards()
 
     # generate_cards('Антикор', 'egida', '340501-PNT', '30.11.2022')

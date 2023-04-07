@@ -142,6 +142,7 @@ class ParserSCV:
                         current['rm'][-1]['ind_code'].append(ind_code)
 
         print(f'Создан json файл на {wp_count} рм')
+        return wp_count
 
     def column_parsing(self, count: int, rm_column: int, count_column: int, fio_column=0, snils_column=0,
                        oborud_column=0, material_column=0, ind_code_column=0, rm_type_column=0, etks_column=0,
@@ -248,3 +249,4 @@ class ParserSCV:
                         current['rm'][-1]['woman_in_rm'].append(woman_in_rm)
 
         print(f'Создан json файл на {wp_count} рм')
+        return wp_count

@@ -191,12 +191,15 @@ class DocxAdapter:
         run.font.size = Pt(8)
         table = self.cards_doc.add_table(rows=0, cols=7)
         names_list = []
-        if status != 1:
-            for name in names:
-                names_list.append(name)
+        for name in names:
+            names_list.append(name)
+        # if status != 1:
+        #     for name in names:
+        #         names_list.append(name)
         if status == 1:
             for i in range(10):
                 names_list.append('')
+
         for name in names_list:
             row_1 = table.add_row()
             row_2 = table.add_row()
