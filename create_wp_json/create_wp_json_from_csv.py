@@ -12,39 +12,39 @@ def make_json_org(name):
     parser_csv = ParserSCV(csv_address_str)
     # Обязательные параметры:
     # По строкам 'row', по столбцам 'column'
-    flag = 'column'
+    flag = 'row'
     #   Введите количество колонок с подразделениями
-    count = 6
+    count = 0
     #   Введите порядковый номер колонки с названиями рабочих мест
-    rm_column = 6
+    rm_column = 2
     #   Введите номер колонки с просчетом
-    count_column = 12
+    count_column = 7
 
     # Не обязательные колонки, если колонки нет введите 0:
     #   Введите порядковый номер колонки с ФИО.
-    fio_column = 0
+    fio_column = 12
     #   Введите порядковый номер колонки с СНИЛС.
-    snils_column = 0
+    snils_column = 14
     #   Введите порядковый номер колонки с оборудованием.
     oborud_column = 0
     #   Введите порядковый номер колонки с материалами
     material_column = 0
     #   Введите порядковый номер колонки с индивидуальным номером
-    ind_code_column = 8
+    ind_code_column = 0
     #   Введите порядковый номер колонки с типом рабочего места (должно соответствовать ключу в dict.json)
-    rm_type_column = 7
+    rm_type_column = 3
     #   Введите порядковый номер колонки с кодом по ОК
-    codeok_column = 9
+    codeok_column = 5
     #   Введите порядковый номер колонки с ЕТКС
-    etks_column = 10
+    etks_column = 6
     #   Введите порядковый номер колонки с адресом
-    address_column = 11
+    address_column = 0
     #   Введите порядковый номер колонки с временем смены
-    timesmena_column = 0
+    timesmena_column = 4
     #   Введите порядковый номер колонки со сменностью
     people_in_rm_column = 0
     #   Введите порядковый номер колонки с количеством женщин
-    woman_in_rm_column = 13
+    woman_in_rm_column = 9
 
     rm_count = 0
 
@@ -66,7 +66,7 @@ def make_json_org(name):
                                    ind_code_column=ind_code_column, rm_type_column=rm_type_column,
                                    etks_column=etks_column, codeok_column=codeok_column, address_column=address_column,
                                    timesmena_column=timesmena_column, people_in_rm_column=people_in_rm_column,
-                                   woman_in_rm_column=woman_in_rm_column)
+                                   woman_in_rm_column=woman_in_rm_column, is_address_in_dep=False)
 
     parser_csv.get_json(output_dir + '\\dict.json')
     return rm_count

@@ -47,11 +47,16 @@ class CreateDB:
         self.max_rm = self.db.select_one_from_DB(self.sql_dict['select']['max_order'] + 'struct_rm')
         self.wp_count = 0
         self.bar = Bar('Выполнено:', max=rm_count)
+        self.mguid_num = []
 
-    @staticmethod
-    def get_mguid(name_id: str, m_order=1) -> str:
-        unique_num = int((datetime.datetime.now().timestamp() % 10) * 1000000000000000)
-        return hex(unique_num * m_order + id(name_id))[2:].upper()
+    def get_mguid(self, name_id: str, m_order=1) -> str:
+        unique_num = int((datetime.datetime.now().timestamp() % random.randint(1, 120)) * 1000000000000000)
+        res_num = hex(unique_num * m_order + id(name_id))[2:].upper()
+        if res_num in self.mguid_num:
+            self.get_mguid(name_id, unique_num)
+        else:
+            self.mguid_num.append(res_num)
+            return res_num
 
     def insert_ceh(self, id_org):
         # Перебираем цеха:
@@ -93,10 +98,11 @@ class CreateDB:
             # Создаём уникальный идентификатор:
             mguid = self.get_mguid(rm['caption'], self.max_ceh)
             # Создаём кортеж для вставки и вставляем его в БД:
-            kut1 = 2
-            file_sout = mguid + r'\Карта СОУТ.docx'
-            codeok = rm['codeok'] if rm['codeok'] != '' else self.rm_dict[rm['rm_type']]['rm_data']['codeok']
-            etks = rm['etks'] if rm['codeok'] != '' else self.rm_dict[rm['rm_type']]['rm_data']['etks']
+            random_rm = str(random.randint(0, len(list(self.rm_dict[rm['rm_type']].keys()))-1))
+            kut1 = self.rm_dict[rm['rm_type']][random_rm]['rm_data']['kut1']
+            file_sout = mguid + '\\' + self.rm_dict[rm['rm_type']][random_rm]['rm_data']['file_sout']
+            codeok = rm['codeok'] if rm['codeok'] != '' else self.rm_dict[rm['rm_type']][random_rm]['rm_data']['codeok']
+            etks = rm['etks'] if rm['codeok'] != '' else self.rm_dict[rm['rm_type']][random_rm]['rm_data']['etks']
             rm_tuple = (rm['caption'], id_ceh, id_uch, codeok, etks, self.max_rm, mguid, kut1, file_sout,
                         str(rm['ind_code'][0]), rm['address'], rm['timesmena'], rm['people_in_rm'],
                         rm['woman_in_rm'][0])
@@ -108,13 +114,13 @@ class CreateDB:
             rabs_tuple = (id_rm, rm['fio'][0], rm['snils'][0])
             self.db.insert_in_DB(self.sql_dict['insert']['sout_rabs'], rabs_tuple)
             # Вставка данных из шаблона
-            self.insert_other_rm_data(rm['rm_type'], id_rm, mguid, rm)
+            self.insert_other_rm_data(rm['rm_type'], id_rm, mguid, rm, random_rm)
             self.max_rm += 1
             # ПОЧЕМУ ТЫ НЕ РАБОТАЕШЬ!!!
             # if len(rm['oborud']) > 0:
             #     self.db.insert_in_DB(self.sql_dict['update']['sout_dop_info_fact'], rm['oborud'], rm['material'], id_rm)
             # Создание файлов по шаблону:
-            self.insert_data(mguid, rm['rm_type'])
+            self.insert_data(mguid, rm['rm_type'], random_rm)
 
             # Если у РМ есть аналогичные добавляем их:
             if rm['analog'] > 0:
@@ -133,16 +139,17 @@ class CreateDB:
 
         # Добавляем все аналогичные РМ:
         for i in range(rm['analog']):
+            random_rm = str(random.randint(0, len(list(self.rm_dict[rm['rm_type']].keys())) - 1))
             # Создаём новый уникальный идентификатор:
             mguid = self.get_mguid(str(i), self.max_ceh)
             rm_mguid = 0
             # Создаём кортеж для вставки и вставляем его в БД:
             file_sout = ''
-            codeok = rm['codeok'] if rm['codeok'] != '' else self.rm_dict[rm['rm_type']]['rm_data']['codeok']
-            etks = rm['etks'] if rm['codeok'] != '' else self.rm_dict[rm['rm_type']]['rm_data']['etks']
+            codeok = rm['codeok'] if rm['codeok'] != '' else self.rm_dict[rm['rm_type']][random_rm]['rm_data']['codeok']
+            etks = rm['etks'] if rm['codeok'] != '' else self.rm_dict[rm['rm_type']][random_rm]['rm_data']['etks']
             rm_tuple = (rm['caption'], id_ceh, id_uch, codeok, etks, self.max_rm, mguid, kut1, file_sout,
                         str(rm['ind_code'][i + 1]), rm['address'], rm['timesmena'], rm['people_in_rm'],
-                        rm['woman_in_rm'][i+1])
+                        rm['woman_in_rm'][i + 1])
             self.db.insert_in_DB(self.sql_dict['insert']['add_rm'], rm_tuple)
             # Получение id нового РМ и вставка в группу аналогии:
             id_anal_rm = self.db.select_one_from_DB(self.sql_dict['select']['id_last'])
@@ -151,11 +158,11 @@ class CreateDB:
             self.db.insert_in_DB(self.sql_dict['insert']['sout_rabs'], an_rabs_tuple)
             # Вставка данных из шаблона
             if count > 1:
-                self.insert_data(mguid, rm['rm_type'])
+                self.insert_data(mguid, rm['rm_type'], random_rm)
                 count -= 1
                 rm_mguid = mguid
 
-            self.insert_other_rm_data(rm['rm_type'], id_anal_rm, rm_mguid, rm)
+            self.insert_other_rm_data(rm['rm_type'], id_anal_rm, rm_mguid, rm, random_rm)
 
             # if len(rm['oborud']) > 0:
             #     self.db.insert_in_DB(self.sql_dict['update']['sout_dop_info_fact'], rm['oborud'], rm['material'],
@@ -163,21 +170,21 @@ class CreateDB:
             self.max_rm += 1
             self.db.insert_in_DB(self.sql_dict['insert']['add_analog'], anal_id, id_anal_rm, id_rm)
 
-    def insert_other_rm_data(self, rm_type, id_rm, rm_mguid, rm):
+    def insert_other_rm_data(self, rm_type, id_rm, rm_mguid, rm, random_rm_num):
         rm_keys_dict = ["per_genfactors", "sout_dop_info2", "sout_dop_info_fact", "sout_dop_info_norm", "sout_factors",
                         "sout_ident", "sout_karta_dop_info"]
         rzone_keys_dict = ["per_gigfactors", "per_rzona_mat"]
         # Вставляем данные о рабочих местах
         for key in rm_keys_dict:
-            if key in self.rm_dict[rm_type].keys():
+            if key in self.rm_dict[rm_type][random_rm_num].keys():
                 if key == 'sout_dop_info_fact' and rm['oborud'] != '' and rm['material'] != '':
-                    for i in self.rm_dict[rm_type][key]:
+                    for i in self.rm_dict[rm_type][random_rm_num][key]:
                         other_tuple = (id_rm, rm['oborud'], rm['material'], *i[2:])
                         self.db.insert_in_DB(self.sql_dict['insert'][key], other_tuple)
 
                 elif key == 'sout_factors':
                     if rm_mguid != 0:
-                        for i in self.rm_dict[rm_type][key]:
+                        for i in self.rm_dict[rm_type][random_rm_num][key]:
                             tmp = i[-1].split('\\')[-1]
                             address = rm_mguid + '\\' + tmp
                             mguid = self.get_mguid(str(i[0]), self.max_ceh)
@@ -185,12 +192,12 @@ class CreateDB:
                             self.db.insert_in_DB(self.sql_dict['insert'][key], other_tuple)
                             self.db.insert_in_DB(self.sql_dict['insert']['sout_factor_info'], mguid)
                 else:
-                    for i in self.rm_dict[rm_type][key]:
+                    for i in self.rm_dict[rm_type][random_rm_num][key]:
                         other_tuple = (id_rm, *i)
                         self.db.insert_in_DB(self.sql_dict['insert'][key], other_tuple)
         # Добавляем рабочие зоны и дополняем их данными
-        if 'per_rzona' in self.rm_dict[rm_type].keys():
-            for i in self.rm_dict[rm_type]['per_rzona']:
+        if 'per_rzona' in self.rm_dict[rm_type][random_rm_num].keys():
+            for i in self.rm_dict[rm_type][random_rm_num]['per_rzona']:
                 other_tuple = (id_rm, *i)
                 self.db.insert_in_DB(self.sql_dict['insert']['per_rzona'], other_tuple)
                 # Получаем ID рабочего места
@@ -203,8 +210,8 @@ class CreateDB:
                 tuple_zone_info = (rzone_id, os_skor, os_patm, os_temp, os_vlag)
                 self.db.insert_in_DB(self.sql_dict['insert']['per_rzona_info'], tuple_zone_info)
                 for key in rzone_keys_dict:
-                    if key in self.rm_dict[rm_type].keys():
-                        for j in self.rm_dict[rm_type][key]:
+                    if key in self.rm_dict[rm_type][random_rm_num].keys():
+                        for j in self.rm_dict[rm_type][random_rm_num][key]:
                             other_tuple = (rzone_id, *j)
                             self.db.insert_in_DB(self.sql_dict['insert'][key], other_tuple)
         return
@@ -217,13 +224,14 @@ class CreateDB:
         self.insert_ceh(org_id)
 
     # Копирование файлов из шаблона
-    def insert_data(self, mguid, type_rm):
+    def insert_data(self, mguid, type_rm, random_rm_num):
         if type_rm in self.rm_dict.keys():
             dist = self.conn_str + '\\ARMv51_files\\' + mguid
             p_dir = f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\Templates\\{self.template_name}\\{type_rm}'
-            all_folders = os.listdir(p_dir)
-            rand_int = random.randint(0, len(all_folders) - 1)
-            p_dir += '\\' + all_folders[rand_int]
+            # all_folders = os.listdir(p_dir)
+            # rand_int = random.randint(0, len(all_folders) - 1)
+            # p_dir += '\\' + all_folders[int(random_rm_num)]
+            p_dir += '\\' + random_rm_num
             shutil.copytree(p_dir, dist)
             # Подсчет рабочих мест в оплату
             self.wp_count += 1

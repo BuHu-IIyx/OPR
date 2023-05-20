@@ -12,7 +12,7 @@ class ParserSCV:
     def start_with_b_l(wrong_str: str) -> str:
         w_str = wrong_str.strip()
         return w_str[0].upper() + w_str[1:].strip()
-            # .lower()
+        # .lower()
 
     def get_json(self, json_address: str):
         with open(json_address, 'w', encoding="utf-8-sig") as file:
@@ -78,68 +78,76 @@ class ParserSCV:
                             current_lvl = int(r[0])
                             current_list = temp_list
 
-                elif len(r[rm_column]) > 0:
+                else:
                     # Инициализация информации о рабочем месте
                     wp_name = self.start_with_b_l(r[rm_column])
                     wp_count += 1
-                    fio = r[fio_column].title() if fio_column != 0 \
-                        else ''
-                    snils = r[snils_column] if snils_column != 0 \
-                        else 'Отсутствует'
-                    ind_code = r[ind_code_column] if ind_code_column != 0 \
-                        else ''
                     address = f"Фактический адрес: {r[address_column]}" if address_column != 0 \
                         else ''
-                    oborud = r[oborud_column] if oborud_column != 0 \
-                        else ''
-                    material = self.start_with_b_l(r[material_column]) if material_column != 0 \
-                        else ''
-                    rm_type = r[rm_type_column].strip() if rm_type_column != 0 \
-                        else 'office'
-                    etks = r[etks_column] if etks_column != 0 \
-                        else ''
-                    codeok = r[codeok_column] if codeok_column != 0 \
-                        else ''
-                    timesmena = int(float(r[timesmena_column].replace(',', '.')) * 60) if timesmena_column != 0 \
-                        else 480
-                    people_in_rm = (2 if r[people_in_rm_column] == '2/2' else
-                                    (4 if r[people_in_rm_column] == '3/3' else 1)) if timesmena_column != 0 \
-                        else 1
 
-                    rm_dict = {'caption': wp_name,
-                               'analog': 0,
-                               'oborud': oborud,
-                               'material': material,
-                               'fio': [fio, ],
-                               'snils': [snils, ],
-                               'ind_code': [ind_code, ],
-                               'rm_type': rm_type,
-                               'etks': etks,
-                               'codeok': codeok,
-                               'address': address,
-                               'timesmena': timesmena,
-                               'people_in_rm': people_in_rm}
+                    # Вывод адреса в название подразделения, если необходимо
+                    if is_address_in_dep and 'rm' not in current.keys():
+                        if address not in current.keys():
+                            current[address] = {}
+                        current = current[address]
+                        current_lvl += 1
 
                     # Создание ключа рабочих мест, и вставка первого РМ в отдел
                     if 'rm' not in current.keys():
-                        # Вывод адреса в название подразделения, если необходимо
-                        if is_address_in_dep:
-                            if address not in current.keys():
-                                current[address] = {}
-                            current = current[address]
-                            current_lvl += 1
-                        current['rm'] = [rm_dict, ]
+                        current['rm'] = []
 
                     # Если такого рабочего места нет — создаём новую запись
-                    elif len(r[count_column]) > 0:
+                    # elif len(r[count_column]) > 0:
+                    if r[count_column].isdigit():
+                        fio = r[fio_column].title() if fio_column != 0 \
+                            else ''
+                        snils = r[snils_column] if snils_column != 0 \
+                            else 'Отсутствует'
+                        ind_code = r[ind_code_column] if ind_code_column != 0 \
+                            else ''
+                        oborud = r[oborud_column] if oborud_column != 0 \
+                            else ''
+                        material = r[material_column] if material_column != 0 \
+                            else ''
+                        rm_type = r[rm_type_column].strip() if rm_type_column != 0 \
+                            else 'office'
+                        etks = r[etks_column] if etks_column != 0 \
+                            else ''
+                        codeok = r[codeok_column] if codeok_column != 0 \
+                            else ''
+                        timesmena = int(float(r[timesmena_column].replace(',', '.')) * 60) if timesmena_column != 0 \
+                            else 480
+                        people_in_rm = int(r[people_in_rm_column]) if people_in_rm_column != 0 else 1
+                        # (2 if r[people_in_rm_column] == '2' else
+                        #             (4 if r[people_in_rm_column] == '3/3' else 1)) if timesmena_column != 0 \
+                        # else 1
+                        woman_in_rm = r[woman_in_rm_column] if woman_in_rm_column != 0 \
+                            else 0
+
+                        rm_dict = {'caption': wp_name,
+                                   'analog': 0,
+                                   'oborud': oborud,
+                                   'material': material,
+                                   'fio': [fio, ],
+                                   'snils': [snils, ],
+                                   'ind_code': [ind_code, ],
+                                   'woman_in_rm': [woman_in_rm, ],
+                                   'rm_type': rm_type,
+                                   'etks': etks,
+                                   'codeok': codeok,
+                                   'address': address,
+                                   'timesmena': timesmena,
+                                   'people_in_rm': people_in_rm}
+
                         current['rm'].append(rm_dict)
 
                     # Если место есть — добавляем аналогию
                     else:
                         current['rm'][-1]['analog'] += 1
-                        current['rm'][-1]['fio'].append(fio)
-                        current['rm'][-1]['snils'].append(snils)
-                        current['rm'][-1]['ind_code'].append(ind_code)
+                        current['rm'][-1]['fio'].append(r[fio_column].title() if fio_column != 0 else '')
+                        current['rm'][-1]['snils'].append(r[snils_column] if snils_column != 0 else 'Отсутствует')
+                        current['rm'][-1]['ind_code'].append(r[ind_code_column] if ind_code_column != 0 else '')
+                        current['rm'][-1]['woman_in_rm'].append(r[woman_in_rm_column] if woman_in_rm_column != 0 else 0)
 
         print(f'Создан json файл на {wp_count} рм')
         return wp_count

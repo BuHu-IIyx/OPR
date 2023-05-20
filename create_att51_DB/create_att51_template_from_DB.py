@@ -16,12 +16,14 @@ class CreateTemplate:
     def create_template(self, template_name):
         rms = self.db.get_rm_from_db(template_name)
         for rm in rms:
-            self.copy_DB_files(rm[1], rm[2], template_name)
+            analog_rm_number = self.copy_DB_files(rm[1], rm[2], template_name)
             if rm[1] not in self.res_dict.keys():
                 self.res_dict[rm[1]] = {}
-                self.res_dict[rm[1]]['rm_data'] = {'codeok': rm[3], 'etks': rm[4]}
-                for key in self.sql_dict.keys():
-                    self.read_table(key, rm[0], rm[1])
+            self.res_dict[rm[1]][analog_rm_number] = {}
+            self.res_dict[rm[1]][analog_rm_number]['rm_data'] = {'codeok': rm[3], 'etks': rm[4],
+                                                                 'file_sout': rm[5].split('\\')[-1], 'kut1': rm[6]}
+            for key in self.sql_dict.keys():
+                self.read_table(key, rm[0], rm[1], analog_rm_number)
         self.save_res_dict(template_name)
 
     def save_res_dict(self, template_name):
@@ -34,11 +36,11 @@ class CreateTemplate:
         except TypeError as e:
             print(e)
 
-    def read_table(self, table, rm_id, rm_name):
+    def read_table(self, table, rm_id, rm_name, analog_rm_number):
         rows = self.db.execute_DB(self.sql_dict[table], rm_id)
         # rows = self.cursor.execute(self.sql_dict[table]).fetchall()
         if len(rows) > 0:
-            self.res_dict[rm_name][table] = []
+            self.res_dict[rm_name][analog_rm_number][table] = []
             for row in rows:
                 res_list = []
                 for elem in row:
@@ -46,7 +48,7 @@ class CreateTemplate:
                         res_list.append(str(elem))
                     else:
                         res_list.append(elem)
-                self.res_dict[rm_name][table].append(res_list)
+                self.res_dict[rm_name][analog_rm_number][table].append(res_list)
 
     def copy_DB_files(self, rm_name, path_mguid, res_folder):
         from_path = self.db.db_path + '\\ARMv51_files\\' + path_mguid
@@ -57,6 +59,7 @@ class CreateTemplate:
         except OSError as err:
             print('Для ' + rm_name + ' не создан шаблон!!!')
             print(err)
+        return dist_path.split('\\')[-1]
 
     def check_folder(self, path, count=0):
         res_path = path + '\\' + str(count)

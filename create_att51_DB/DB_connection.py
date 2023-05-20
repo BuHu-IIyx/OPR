@@ -10,10 +10,11 @@ class DBConnector:
             self.connect = pyodbc.connect(db_conn_str)
             self.cursor = self.connect.cursor()
         except pyodbc.Error as e:
-            print("Error in Connection", e)
+            print("Error in Connection-1", e)
 
     def get_rm_from_db(self, org_name):
-        sql = 'SELECT rm.id, rm.caption, rm.mguid, codeok, etks FROM (struct_rm rm INNER JOIN struct_ceh ceh ' \
+        sql = 'SELECT rm.id, rm.caption, rm.mguid, rm.codeok, rm.etks, rm.file_sout, rm.kut1 ' \
+              'FROM (struct_rm rm INNER JOIN struct_ceh ceh ' \
               'ON rm.ceh_id = ceh.id) ' \
               'INNER JOIN struct_org org ON ceh.org_id = org.id WHERE org.caption = ? AND rm.deleted = 0'
         res = self.cursor.execute(sql, org_name).fetchall()
@@ -25,7 +26,7 @@ class DBConnector:
             return res
 
         except pyodbc.Error as e:
-            print("Error in Connection", e)
+            print("Error in Connection0", e)
 
     def execute_DB1(self, sql_str):
         try:
@@ -33,7 +34,7 @@ class DBConnector:
             return res
 
         except pyodbc.Error as e:
-            print("Error in Connection", e)
+            print("Error in Connection1", e, )
 
     def select_one_from_DB(self, sql_str, *args):
         try:
@@ -43,7 +44,7 @@ class DBConnector:
             else:
                 return 0
         except pyodbc.Error as e:
-            print("Error in Connection", e)
+            print("Error in Connection2", e)
 
     def insert_in_DB(self, sql_str, *args):
         try:
@@ -53,7 +54,7 @@ class DBConnector:
 
         except pyodbc.Error as e:
             print(sql_str, args)
-            print("Error in Connection", e)
+            print("Error in Connection3", e)
 
     # def __del__(self):
     #     self.connect.commit()

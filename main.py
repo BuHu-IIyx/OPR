@@ -20,9 +20,8 @@ def create_db(name, template_name):
     db_interface.create_DB()
 
 
-def update_db():
-    db_path = "C:\\Users\\buhu_\\Работа\\Оборонка\\базы"
-    all_folders = os.listdir(db_path)
+def update_db(db_path):
+    # all_folders = os.listdir(db_path)
     dict_measure = {
         'Тяжесть (ж)': ['Тяжесть: Организовать рациональные режимы труда  и отдыха',
                         'Снижение тяжести трудового процесса'],
@@ -42,42 +41,57 @@ def update_db():
                          'заболеваний',
                          'Проведение медицинского осмотра']
     }
-    for folder in all_folders:
-        db_conn = DBConnector(db_path + '\\' + folder)
-        sql = "SELECT id, factor_name FROM sout_factors WHERE KUT='3.1' OR KUT='3.2'"
-        res = db_conn.execute_DB1(sql)
-        sql_update = 'UPDATE sout_factor_info SET measure=?, purpose=? WHERE id=?'
-        for rm in res:
-            fact_id = rm[0]
-            fact_name = rm[1]
-            db_conn.insert_in_DB(sql_update, dict_measure[fact_name][0], dict_measure[fact_name][1], fact_id)
-        print(folder)
+    db_conn = DBConnector(db_path)
+    sql = "SELECT id, factor_name FROM sout_factors WHERE KUT='3.1' OR KUT='3.2'"
+    res = db_conn.execute_DB1(sql)
+    sql_update = 'UPDATE sout_factor_info SET measure=?, purpose=? WHERE id=?'
+    for rm in res:
+        fact_id = rm[0]
+        fact_name = rm[1]
+        db_conn.insert_in_DB(sql_update, dict_measure[fact_name][0], dict_measure[fact_name][1], fact_id)
+    # for folder in all_folders:
+    #     db_conn = DBConnector(db_path + '\\' + folder)
+    #     sql = "SELECT id, factor_name FROM sout_factors WHERE KUT='3.1' OR KUT='3.2'"
+    #     res = db_conn.execute_DB1(sql)
+    #     sql_update = 'UPDATE sout_factor_info SET measure=?, purpose=? WHERE id=?'
+    #     for rm in res:
+    #         fact_id = rm[0]
+    #         fact_name = rm[1]
+    #         db_conn.insert_in_DB(sql_update, dict_measure[fact_name][0], dict_measure[fact_name][1], fact_id)
+    #     print(folder)
 
 
 if __name__ == '__main__':
-    # update_db()
+    # TODO перевести все обращения к базе в сессии
+    # TODO сделать генерацию отчета по рискам на шаблонах, должно ускорить работу
+    # TODO сделать генерацию карт по рискам на шаблонах, если это возможно
+    # update_db('output/СОУТ ИНШААТ/СОУТ ИНШААТ_БД')
     # conn_str = 'C:\\Users\\buhu_\\PycharmProjects\\OPR\\input\\template'
 
     # Создание контингента:
-    # conn_str1 = 'C:\\Users\\buhu_\\Работа\\Альфа\\база конт'
+    # conn_str1 = 'D:/!Работа/!СОУТ/Монополия/контингент'
     # template = CreateTemplate(conn_str1)
-    # template.create_template('ALFA')
+    # template.create_template('Монополия')
 
     # Создание базы данных:
     # arr_sber = ['2 ВТБ ГО 2023', '2 ВТБ ОПЕРУ+7806 2023']
     # for item in arr_sber:
     #     create_db(item, 'template')
-    create_db('АЛЬФА', 'ALFA')
+    # for i in range(1, 9):
+    #     name = 'СОУТ Ванкор РНВ' + str(i)
+    #     create_db(name, 'Ванкор 2023')
+    create_db('СОУТ Монополия', 'Монополия')
 
     # create_att51_template()
 
     # Импорт контингента в риски:
-    # db = DBAdapter()
+    # db = DBAdapter()y
     # db.import_templates_from_csv('C:\\Users\\buhu_\\PycharmProjects\\OPR\\input\\template'
     #                              '\\Шаблоны Рисков Птицефабрика.csv')
 
     # Импорт json организации в базу данных:
-    # org_name = 'ОСИ(испр1)'
+    # org_name = 'Тест 1'
+    # make_json_org('Риски Тест 1')
     # db = DBAdapter()
     # db.import_organization_json(
     #     f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\РИСКИ {org_name}\\dict.json',
@@ -85,7 +99,7 @@ if __name__ == '__main__':
 
     # Создать отчет по рискам из БД
     # docAdapter = DocxAdapter(org_name, 'sercons', '2022-07-340613-RDI-SC', '20.09.2022')
-    # # docAdapter.generate_otchet_file()
+    # docAdapter.generate_otchet_file()
     # docAdapter.generate_cards()
 
     # generate_cards('Антикор', 'egida', '340501-PNT', '30.11.2022')
