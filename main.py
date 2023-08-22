@@ -39,7 +39,9 @@ def update_db(db_path):
                 ' в соответствии с Р 2.2.2006-05', 'Снижение воздействия вредного фактора на организм человека'],
         'УФ-излучение': ['УФ-излучение: Контроль за состоянием здоровья, с целью выявления профессиональных '
                          'заболеваний',
-                         'Проведение медицинского осмотра']
+                         'Проведение медицинского осмотра'],
+        'Напряженность': ['Напряженность: Организовать рациональные режимы труда  и отдыха',
+                          'Снижение напряженности трудового процесса'],
     }
     db_conn = DBConnector(db_path)
     sql = "SELECT id, factor_name FROM sout_factors WHERE KUT='3.1' OR KUT='3.2'"
@@ -65,48 +67,48 @@ if __name__ == '__main__':
     # TODO перевести все обращения к базе в сессии
     # TODO сделать генерацию отчета по рискам на шаблонах, должно ускорить работу
     # TODO сделать генерацию карт по рискам на шаблонах, если это возможно
-    # update_db('output/СОУТ ИНШААТ/СОУТ ИНШААТ_БД')
+    # update_db('D:/!Работа/!СОУТ/ДЛТ/База ДЛ-Транс')
     # conn_str = 'C:\\Users\\buhu_\\PycharmProjects\\OPR\\input\\template'
 
     # Создание контингента:
-    # conn_str1 = 'D:/!Работа/!СОУТ/Монополия/контингент'
+    # conn_str1 = 'D:/!Работа/!СОУТ/Европа/База КОНТ Европа'
     # template = CreateTemplate(conn_str1)
-    # template.create_template('Монополия')
+    # template.create_template('ЕВРОПА')
 
     # Создание базы данных:
-    # arr_sber = ['2 ВТБ ГО 2023', '2 ВТБ ОПЕРУ+7806 2023']
+    # arr_sber = ['147']
     # for item in arr_sber:
-    #     create_db(item, 'template')
+    #     create_db(f'СОУТ ВМЗ {item}', 'SBER2')
     # for i in range(1, 9):
     #     name = 'СОУТ Ванкор РНВ' + str(i)
     #     create_db(name, 'Ванкор 2023')
-    create_db('СОУТ Монополия', 'Монополия')
+    create_db('СОУТ Европа', 'ЕВРОПА')
 
     # create_att51_template()
 
     # Импорт контингента в риски:
-    # db = DBAdapter()y
+    # db = DBAdapter()
     # db.import_templates_from_csv('C:\\Users\\buhu_\\PycharmProjects\\OPR\\input\\template'
-    #                              '\\Шаблоны Рисков Птицефабрика.csv')
+    #                              '\\Шаблоны Рисков САТО.csv')
 
     # Импорт json организации в базу данных:
-    # org_name = 'Тест 1'
-    # make_json_org('Риски Тест 1')
+    # org_name = 'Пульс 1'
+    # make_json_org(f'РИСКИ {org_name}')
     # db = DBAdapter()
     # db.import_organization_json(
     #     f'C:\\Users\\buhu_\\PycharmProjects\\OPR\\output\\РИСКИ {org_name}\\dict.json',
     #     org_name, org_head_pos='', org_head_name='')
-
-    # Создать отчет по рискам из БД
-    # docAdapter = DocxAdapter(org_name, 'sercons', '2022-07-340613-RDI-SC', '20.09.2022')
-    # docAdapter.generate_otchet_file()
+    #
+    # # Создать отчет по рискам из БД
+    # docAdapter = DocxAdapter(org_name, 'sercons', '2023-05-406041-HEV-SC', '22.06.2023')
+    # # docAdapter.generate_otchet_file()
     # docAdapter.generate_cards()
 
     # generate_cards('Антикор', 'egida', '340501-PNT', '30.11.2022')
     # create_docx_from_template('Антикор', 'egida')
 
     # make_json_org(f'РИСКИ {org_name}')
-    # make_json_org('3 ВТБ ГО 2023')
+    # make_json_org('СОУТ СБЕР Коми')
     # make_json_org('Риски ОСИ Горелово')
     # make_json_org('Риски ОСИ СПБ')
 

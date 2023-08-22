@@ -60,7 +60,10 @@ class DocxAdapter:
         table1.cell(0, 0).merge(table1.cell(1, 0)).paragraphs[0].add_run().add_picture(
             f'input/for_risks/logo/{self.lab}.jpg',
             width=Mm(30))
+        # Для всех
         run1 = table1.cell(0, 1).paragraphs[0].add_run("Карта оценки уровней профессионального риска")
+        # Для МОНОПОЛИИ
+        # run1 = table1.cell(0, 1).paragraphs[0].add_run("Карта оценки профессиональных рисков")
         run1.font.size = Pt(10)
         run1.bold = True
         table1.cell(0, 1).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
@@ -180,15 +183,30 @@ class DocxAdapter:
             cells3[5]._tc.get_or_add_tcPr().append(shading_elm)
 
         self.cards_doc.add_paragraph("")
-        self.fill_signature(0, 'Инженер по специальной оценке условий труда ИЛ', ['Василенко А.С.', ], self.date_otch)
+        # МОНОПОЛИЯ
+        # run = self.cards_doc.add_paragraph().add_run("Комиссия по идентификации опасностей:")
+        # run.bold = True
+        # run.font.size = Pt(8)
+        # self.fill_signature(2, 'Руководитель направления по урегулированию убытков и правовому сопровождению '
+        #                        'трудовых правоотношений', ['Цапина Виктория Ивановна', ], '')
+        # self.fill_signature(2, 'Специалист по охране труда', ['Дубовик Наталья Валерьевна', ], '')
+        # self.fill_signature(2, 'Ведущий специалист по закупкам', ['Асанов Денис Сергеевич', ], '')
+
+        self.fill_signature(0, 'Инженер по специальной оценке условий труда ИЛ', ['Притчина Т.А.', ], self.date_otch)
         self.fill_signature(1, wp_caption, persons, '')
+
+        # МОНОПОЛИЯ
+        # self.cards_doc.add_page_break()
+        # self.fill_signature(3, wp_caption, persons, '')
         return
 
     def fill_signature(self, status, position, names, date):
-        status_list = ["Разработал:", "Ознакомлен:"]
-        run = self.cards_doc.add_paragraph().add_run(status_list[status])
-        run.bold = True
-        run.font.size = Pt(8)
+        status_list = ["Разработал:", "Ознакомлен:", "Комиссия по идентификации опасностей:",
+                       "Лист ознакомления с картой оценки профессиональных рисков:"]
+        if status != 2:
+            run = self.cards_doc.add_paragraph().add_run(status_list[status])
+            run.bold = True
+            run.font.size = Pt(8)
         table = self.cards_doc.add_table(rows=0, cols=7)
         names_list = []
         for name in names:
@@ -196,7 +214,7 @@ class DocxAdapter:
         # if status != 1:
         #     for name in names:
         #         names_list.append(name)
-        if status == 1:
+        if status == 1 or status == 3:
             for i in range(10):
                 names_list.append('')
 

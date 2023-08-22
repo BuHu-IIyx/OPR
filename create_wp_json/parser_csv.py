@@ -80,21 +80,27 @@ class ParserSCV:
 
                 else:
                     # Инициализация информации о рабочем месте
+
                     wp_name = self.start_with_b_l(r[rm_column])
                     wp_count += 1
                     address = f"Фактический адрес: {r[address_column]}" if address_column != 0 \
                         else ''
 
                     # Вывод адреса в название подразделения, если необходимо
-                    if is_address_in_dep and 'rm' not in current.keys():
+                    # if is_address_in_dep and 'rm' not in current.keys():
+                    #     if address not in current.keys():
+                    #         current[address] = {}
+                    #     current = current[address]
+                    #     current_lvl += 1
+
+                    if is_address_in_dep:
                         if address not in current.keys():
                             current[address] = {}
-                        current = current[address]
                         current_lvl += 1
 
                     # Создание ключа рабочих мест, и вставка первого РМ в отдел
-                    if 'rm' not in current.keys():
-                        current['rm'] = []
+                    if 'rm' not in current[address].keys():
+                        current[address]['rm'] = []
 
                     # Если такого рабочего места нет — создаём новую запись
                     # elif len(r[count_column]) > 0:
@@ -139,15 +145,18 @@ class ParserSCV:
                                    'timesmena': timesmena,
                                    'people_in_rm': people_in_rm}
 
-                        current['rm'].append(rm_dict)
+                        current[address]['rm'].append(rm_dict)
 
                     # Если место есть — добавляем аналогию
                     else:
-                        current['rm'][-1]['analog'] += 1
-                        current['rm'][-1]['fio'].append(r[fio_column].title() if fio_column != 0 else '')
-                        current['rm'][-1]['snils'].append(r[snils_column] if snils_column != 0 else 'Отсутствует')
-                        current['rm'][-1]['ind_code'].append(r[ind_code_column] if ind_code_column != 0 else '')
-                        current['rm'][-1]['woman_in_rm'].append(r[woman_in_rm_column] if woman_in_rm_column != 0 else 0)
+                        current[address]['rm'][-1]['analog'] += 1
+                        current[address]['rm'][-1]['fio'].append(r[fio_column].title() if fio_column != 0 else '')
+                        current[address]['rm'][-1]['snils'].append(r[snils_column] if snils_column != 0
+                                                                   else 'Отсутствует')
+                        current[address]['rm'][-1]['ind_code'].append(r[ind_code_column] if ind_code_column != 0
+                                                                      else '')
+                        current[address]['rm'][-1]['woman_in_rm'].append(r[woman_in_rm_column] if
+                                                                         woman_in_rm_column != 0 else 0)
 
         print(f'Создан json файл на {wp_count} рм')
         return wp_count
@@ -198,9 +207,11 @@ class ParserSCV:
                     wp_count += 1
                     # Инициализация информации о рабочем месте
                     wp_name = self.start_with_b_l(r[rm_column])
-                    oborud = self.start_with_b_l(r[oborud_column]) if oborud_column != 0 \
+                    oborud = self.start_with_b_l(r[oborud_column]) \
+                        if (r[oborud_column] != '' and oborud_column != 0)\
                         else ''
-                    material = self.start_with_b_l(r[material_column]) if material_column != 0 \
+                    material = self.start_with_b_l(r[material_column]) \
+                        if (r[material_column] != '' and material_column != 0)\
                         else ''
                     fio = r[fio_column] if fio_column != 0 \
                         else ''
@@ -218,10 +229,11 @@ class ParserSCV:
                         else ''
                     timesmena = int(float(r[timesmena_column].replace(',', '.')) * 60) if timesmena_column != 0 \
                         else 480
-                    people_in_rm = 2 if r[people_in_rm_column] == '2х2' \
-                        else 4 if r[people_in_rm_column] == '3х3' \
-                        else 1 if timesmena_column != 0 \
-                        else 1
+                    people_in_rm = r[people_in_rm_column] if people_in_rm_column != 0 else 1
+                    # people_in_rm = 2 if r[people_in_rm_column] == '2х2' \
+                    #     else 4 if r[people_in_rm_column] == '3х3' \
+                    #     else 1 if timesmena_column != 0 \
+                    #     else 1
                     woman_in_rm = r[woman_in_rm_column] if woman_in_rm_column != 0 \
                         else 0
 
